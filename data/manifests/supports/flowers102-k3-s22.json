@@ -1,0 +1,537 @@
+{
+  "class_map_sha256": "89aa72740be1596d831d08931cf1d684991eb8fc2f9e90f639042038e56b2cff",
+  "content_sha256": "a998201540cbe9ef98fe783f1d45a4fcb953690d1a54dcac173197bb4666c0a8",
+  "created_utc": "2026-11-01T14:31:53Z",
+  "dataset": "flowers102",
+  "k": 3,
+  "n_images": 306,
+  "numpy_version": "2.4.6",
+  "protocol_id": "fewshotlab-v1",
+  "rng": {
+    "bit_generator": "numpy.random.PCG64",
+    "derivation": "uint64 = first 8 bytes (big-endian) of SHA-256 over the canonical JSON label list",
+    "ordering": "image_id ascending within each class, then permuted",
+    "seed_labels": [
+      "flowers102",
+      "support",
+      22,
+      "<class_id>"
+    ]
+  },
+  "schema_version": 1,
+  "seed": 22,
+  "selected": {
+    "0": [
+      "flowers102/image_06741",
+      "flowers102/image_06771",
+      "flowers102/image_06762"
+    ],
+    "1": [
+      "flowers102/image_05124",
+      "flowers102/image_05106",
+      "flowers102/image_05097"
+    ],
+    "10": [
+      "flowers102/image_03117",
+      "flowers102/image_03150",
+      "flowers102/image_03157"
+    ],
+    "100": [
+      "flowers102/image_07963",
+      "flowers102/image_07983",
+      "flowers102/image_07986"
+    ],
+    "101": [
+      "flowers102/image_08004",
+      "flowers102/image_08003",
+      "flowers102/image_08026"
+    ],
+    "11": [
+      "flowers102/image_04036",
+      "flowers102/image_04058",
+      "flowers102/image_04030"
+    ],
+    "12": [
+      "flowers102/image_05787",
+      "flowers102/image_05789",
+      "flowers102/image_05746"
+    ],
+    "13": [
+      "flowers102/image_06052",
+      "flowers102/image_06087",
+      "flowers102/image_06092"
+    ],
+    "14": [
+      "flowers102/image_06368",
+      "flowers102/image_06387",
+      "flowers102/image_06350"
+    ],
+    "15": [
+      "flowers102/image_06689",
+      "flowers102/image_06660",
+      "flowers102/image_06690"
+    ],
+    "16": [
+      "flowers102/image_03875",
+      "flowers102/image_03848",
+      "flowers102/image_03908"
+    ],
+    "17": [
+      "flowers102/image_04300",
+      "flowers102/image_04284",
+      "flowers102/image_04289"
+    ],
+    "18": [
+      "flowers102/image_06170",
+      "flowers102/image_06189",
+      "flowers102/image_06186"
+    ],
+    "19": [
+      "flowers102/image_04945",
+      "flowers102/image_04939",
+      "flowers102/image_04923"
+    ],
+    "2": [
+      "flowers102/image_06632",
+      "flowers102/image_06623",
+      "flowers102/image_06624"
+    ],
+    "20": [
+      "flowers102/image_06781",
+      "flowers102/image_06797",
+      "flowers102/image_06798"
+    ],
+    "21": [
+      "flowers102/image_05344",
+      "flowers102/image_05345",
+      "flowers102/image_05369"
+    ],
+    "22": [
+      "flowers102/image_03440",
+      "flowers102/image_03399",
+      "flowers102/image_03424"
+    ],
+    "23": [
+      "flowers102/image_06832",
+      "flowers102/image_06828",
+      "flowers102/image_08051"
+    ],
+    "24": [
+      "flowers102/image_06578",
+      "flowers102/image_06592",
+      "flowers102/image_06576"
+    ],
+    "25": [
+      "flowers102/image_06524",
+      "flowers102/image_06487",
+      "flowers102/image_06523"
+    ],
+    "26": [
+      "flowers102/image_06856",
+      "flowers102/image_06857",
+      "flowers102/image_06870"
+    ],
+    "27": [
+      "flowers102/image_05226",
+      "flowers102/image_05234",
+      "flowers102/image_05259"
+    ],
+    "28": [
+      "flowers102/image_04127",
+      "flowers102/image_04152",
+      "flowers102/image_04095"
+    ],
+    "29": [
+      "flowers102/image_03488",
+      "flowers102/image_03518",
+      "flowers102/image_03538"
+    ],
+    "3": [
+      "flowers102/image_05670",
+      "flowers102/image_05637",
+      "flowers102/image_05640"
+    ],
+    "30": [
+      "flowers102/image_08075",
+      "flowers102/image_06909",
+      "flowers102/image_08076"
+    ],
+    "31": [
+      "flowers102/image_05616",
+      "flowers102/image_05588",
+      "flowers102/image_05595"
+    ],
+    "32": [
+      "flowers102/image_06449",
+      "flowers102/image_06481",
+      "flowers102/image_06453"
+    ],
+    "33": [
+      "flowers102/image_06947",
+      "flowers102/image_06946",
+      "flowers102/image_06950"
+    ],
+    "34": [
+      "flowers102/image_08086",
+      "flowers102/image_06994",
+      "flowers102/image_06973"
+    ],
+    "35": [
+      "flowers102/image_04358",
+      "flowers102/image_04400",
+      "flowers102/image_04329"
+    ],
+    "36": [
+      "flowers102/image_03811",
+      "flowers102/image_07294",
+      "flowers102/image_03761"
+    ],
+    "37": [
+      "flowers102/image_05832",
+      "flowers102/image_05809",
+      "flowers102/image_05823"
+    ],
+    "38": [
+      "flowers102/image_07010",
+      "flowers102/image_07025",
+      "flowers102/image_07030"
+    ],
+    "39": [
+      "flowers102/image_04573",
+      "flowers102/image_04614",
+      "flowers102/image_04563"
+    ],
+    "4": [
+      "flowers102/image_05194",
+      "flowers102/image_05191",
+      "flowers102/image_05174"
+    ],
+    "40": [
+      "flowers102/image_02191",
+      "flowers102/image_02279",
+      "flowers102/image_02257"
+    ],
+    "41": [
+      "flowers102/image_05740",
+      "flowers102/image_05727",
+      "flowers102/image_05689"
+    ],
+    "42": [
+      "flowers102/image_02420",
+      "flowers102/image_02408",
+      "flowers102/image_02445"
+    ],
+    "43": [
+      "flowers102/image_01566",
+      "flowers102/image_01539",
+      "flowers102/image_01500"
+    ],
+    "44": [
+      "flowers102/image_07135",
+      "flowers102/image_07125",
+      "flowers102/image_07153"
+    ],
+    "45": [
+      "flowers102/image_01019",
+      "flowers102/image_00964",
+      "flowers102/image_01122"
+    ],
+    "46": [
+      "flowers102/image_04968",
+      "flowers102/image_04993",
+      "flowers102/image_05015"
+    ],
+    "47": [
+      "flowers102/image_04689",
+      "flowers102/image_04625",
+      "flowers102/image_04660"
+    ],
+    "48": [
+      "flowers102/image_06237",
+      "flowers102/image_06229",
+      "flowers102/image_06213"
+    ],
+    "49": [
+      "flowers102/image_06310",
+      "flowers102/image_06335",
+      "flowers102/image_06567"
+    ],
+    "5": [
+      "flowers102/image_08108",
+      "flowers102/image_07192",
+      "flowers102/image_07195"
+    ],
+    "50": [
+      "flowers102/image_03967",
+      "flowers102/image_01456",
+      "flowers102/image_01324"
+    ],
+    "51": [
+      "flowers102/image_04215",
+      "flowers102/image_04223",
+      "flowers102/image_04189"
+    ],
+    "52": [
+      "flowers102/image_03667",
+      "flowers102/image_03719",
+      "flowers102/image_03666"
+    ],
+    "53": [
+      "flowers102/image_05407",
+      "flowers102/image_05428",
+      "flowers102/image_05443"
+    ],
+    "54": [
+      "flowers102/image_04758",
+      "flowers102/image_04757",
+      "flowers102/image_04735"
+    ],
+    "55": [
+      "flowers102/image_02848",
+      "flowers102/image_02852",
+      "flowers102/image_02761"
+    ],
+    "56": [
+      "flowers102/image_08122",
+      "flowers102/image_07264",
+      "flowers102/image_07247"
+    ],
+    "57": [
+      "flowers102/image_02689",
+      "flowers102/image_02649",
+      "flowers102/image_02671"
+    ],
+    "58": [
+      "flowers102/image_05071",
+      "flowers102/image_05066",
+      "flowers102/image_05081"
+    ],
+    "59": [
+      "flowers102/image_02944",
+      "flowers102/image_02939",
+      "flowers102/image_03012"
+    ],
+    "6": [
+      "flowers102/image_08103",
+      "flowers102/image_07226",
+      "flowers102/image_07215"
+    ],
+    "60": [
+      "flowers102/image_06256",
+      "flowers102/image_06254",
+      "flowers102/image_06273"
+    ],
+    "61": [
+      "flowers102/image_07274",
+      "flowers102/image_08167",
+      "flowers102/image_08161"
+    ],
+    "62": [
+      "flowers102/image_05897",
+      "flowers102/image_05876",
+      "flowers102/image_05893"
+    ],
+    "63": [
+      "flowers102/image_06144",
+      "flowers102/image_06129",
+      "flowers102/image_06142"
+    ],
+    "64": [
+      "flowers102/image_03215",
+      "flowers102/image_03262",
+      "flowers102/image_03270"
+    ],
+    "65": [
+      "flowers102/image_05538",
+      "flowers102/image_05523",
+      "flowers102/image_05581"
+    ],
+    "66": [
+      "flowers102/image_07063",
+      "flowers102/image_07052",
+      "flowers102/image_07082"
+    ],
+    "67": [
+      "flowers102/image_05906",
+      "flowers102/image_05947",
+      "flowers102/image_05922"
+    ],
+    "68": [
+      "flowers102/image_05997",
+      "flowers102/image_06002",
+      "flowers102/image_05964"
+    ],
+    "69": [
+      "flowers102/image_05306",
+      "flowers102/image_05336",
+      "flowers102/image_05292"
+    ],
+    "7": [
+      "flowers102/image_03356",
+      "flowers102/image_03315",
+      "flowers102/image_03345"
+    ],
+    "70": [
+      "flowers102/image_04491",
+      "flowers102/image_04507",
+      "flowers102/image_04488"
+    ],
+    "71": [
+      "flowers102/image_03619",
+      "flowers102/image_03637",
+      "flowers102/image_03548"
+    ],
+    "72": [
+      "flowers102/image_00411",
+      "flowers102/image_00442",
+      "flowers102/image_00297"
+    ],
+    "73": [
+      "flowers102/image_01254",
+      "flowers102/image_01234",
+      "flowers102/image_01221"
+    ],
+    "74": [
+      "flowers102/image_02182",
+      "flowers102/image_02146",
+      "flowers102/image_02166"
+    ],
+    "75": [
+      "flowers102/image_02519",
+      "flowers102/image_02523",
+      "flowers102/image_02458"
+    ],
+    "76": [
+      "flowers102/image_00144",
+      "flowers102/image_00028",
+      "flowers102/image_00126"
+    ],
+    "77": [
+      "flowers102/image_01918",
+      "flowers102/image_01942",
+      "flowers102/image_01852"
+    ],
+    "78": [
+      "flowers102/image_06704",
+      "flowers102/image_06693",
+      "flowers102/image_06699"
+    ],
+    "79": [
+      "flowers102/image_01990",
+      "flowers102/image_01975",
+      "flowers102/image_01966"
+    ],
+    "8": [
+      "flowers102/image_06423",
+      "flowers102/image_06430",
+      "flowers102/image_06404"
+    ],
+    "80": [
+      "flowers102/image_00888",
+      "flowers102/image_00945",
+      "flowers102/image_00803"
+    ],
+    "81": [
+      "flowers102/image_01691",
+      "flowers102/image_01655",
+      "flowers102/image_01639"
+    ],
+    "82": [
+      "flowers102/image_01816",
+      "flowers102/image_01779",
+      "flowers102/image_01705"
+    ],
+    "83": [
+      "flowers102/image_02554",
+      "flowers102/image_02565",
+      "flowers102/image_02583"
+    ],
+    "84": [
+      "flowers102/image_04776",
+      "flowers102/image_04779",
+      "flowers102/image_04827"
+    ],
+    "85": [
+      "flowers102/image_02884",
+      "flowers102/image_02916",
+      "flowers102/image_02866"
+    ],
+    "86": [
+      "flowers102/image_05461",
+      "flowers102/image_05498",
+      "flowers102/image_05472"
+    ],
+    "87": [
+      "flowers102/image_00485",
+      "flowers102/image_00487",
+      "flowers102/image_00535"
+    ],
+    "88": [
+      "flowers102/image_00667",
+      "flowers102/image_00664",
+      "flowers102/image_00656"
+    ],
+    "89": [
+      "flowers102/image_04443",
+      "flowers102/image_04480",
+      "flowers102/image_04418"
+    ],
+    "9": [
+      "flowers102/image_07117",
+      "flowers102/image_08096",
+      "flowers102/image_07107"
+    ],
+    "90": [
+      "flowers102/image_04851",
+      "flowers102/image_04860",
+      "flowers102/image_04855"
+    ],
+    "91": [
+      "flowers102/image_03093",
+      "flowers102/image_03072",
+      "flowers102/image_03051"
+    ],
+    "92": [
+      "flowers102/image_06017",
+      "flowers102/image_06016",
+      "flowers102/image_08112"
+    ],
+    "93": [
+      "flowers102/image_07307",
+      "flowers102/image_07371",
+      "flowers102/image_07448"
+    ],
+    "94": [
+      "flowers102/image_07587",
+      "flowers102/image_07571",
+      "flowers102/image_07528"
+    ],
+    "95": [
+      "flowers102/image_07653",
+      "flowers102/image_07662",
+      "flowers102/image_07617"
+    ],
+    "96": [
+      "flowers102/image_07741",
+      "flowers102/image_07706",
+      "flowers102/image_07742"
+    ],
+    "97": [
+      "flowers102/image_07781",
+      "flowers102/image_07823",
+      "flowers102/image_07797"
+    ],
+    "98": [
+      "flowers102/image_07871",
+      "flowers102/image_08063",
+      "flowers102/image_07868"
+    ],
+    "99": [
+      "flowers102/image_07934",
+      "flowers102/image_07918",
+      "flowers102/image_07924"
+    ]
+  },
+  "split_manifest": "flowers102-v1.csv",
+  "split_manifest_sha256": "886cf59e92473be726096c16975e82804df0ebe18045274da891ad3747651283"
+}

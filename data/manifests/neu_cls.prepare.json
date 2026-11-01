@@ -1,0 +1,87 @@
+{
+  "archive": {
+    "attempts": [
+      {
+        "result": "HTML page instead of the file",
+        "url": "https://drive.usercontent.google.com/download?id=1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc&export=download"
+      }
+    ],
+    "bytes": 50733617,
+    "content_type": "application/octet-stream",
+    "downloaded_utc": "2026-11-01T14:26:30Z",
+    "extraction": {
+      "extracted_bytes": 78843692,
+      "extracted_files": 1801,
+      "kind": "rar",
+      "members": 1802,
+      "tool": "bsdtar 3.5.3 - libarchive 3.7.4 zlib/1.2.12 liblzma/5.4.3 bz2lib/1.0.8"
+    },
+    "filename": "NEU-CLS.rar",
+    "google_drive_file_id": "1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc",
+    "page": "https://faculty.neu.edu.cn/songkechen/zh_CN/zdylm/263270/list/index.htm",
+    "sha256": "a85bcc6bfa1a40e76f28079e135694aaf5f6a4ee01203f7eaacff0ebafaa96f8",
+    "url": "https://drive.usercontent.google.com/download?id=1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc&export=download&confirm=t&uuid=683d58ed-6e60-4c2f-b879-5dcc969d0f48"
+  },
+  "attempted_utc": "2026-11-01T14:25:53Z",
+  "class_map": {
+    "path": "neu_cls.class_map.json",
+    "sha256": "2788b023a33f8359db75c7154dd335c3e21adc9fd2eac9f33a8dac163241fceb"
+  },
+  "dataset": "neu_cls",
+  "extraction": {
+    "extracted_bytes": 78843692,
+    "extracted_files": 1801,
+    "kind": "rar",
+    "members": 1802,
+    "tool": "bsdtar 3.5.3 - libarchive 3.7.4 zlib/1.2.12 liblzma/5.4.3 bz2lib/1.0.8"
+  },
+  "ignored_os_metadata_files": [
+    "NEU-CLS/Thumbs.db"
+  ],
+  "manifest": {
+    "counts": {
+      "test": 360,
+      "train": 1080,
+      "val": 360
+    },
+    "path": "neu_cls-v1.csv",
+    "rows": 1800,
+    "sha256": "2f4740b0b0167ed3ef95421b53da671724755ed918ed09f53912c51b4aa477ca"
+  },
+  "prepared_utc": "2026-11-01T14:26:38Z",
+  "source": {
+    "google_drive_file_id": "1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc",
+    "mode": "downloaded from the authors' Google Drive link",
+    "page": "https://faculty.neu.edu.cn/songkechen/zh_CN/zdylm/263270/list/index.htm",
+    "variant": "NEU-CLS (image-only classification archive)"
+  },
+  "split": {
+    "exact_duplicate_clusters": [
+      [
+        "neu_cls/Pa_101",
+        "neu_cls/Pa_105"
+      ]
+    ],
+    "group_metadata": "none available from the source; image-level split",
+    "per_class": {
+      "test": 60,
+      "train": 180,
+      "val": 60
+    },
+    "procedure": "per class: image_id ascending -> exact-duplicate clusters as units -> permutation -> cumulative bounds (train, val, test)",
+    "rng": {
+      "bit_generator": "numpy.random.PCG64",
+      "derivation": "uint64 = first 8 bytes (big-endian) of SHA-256 over the canonical JSON label list",
+      "seed_labels": [
+        "neu_cls",
+        "split",
+        2026,
+        "<class_id>"
+      ]
+    },
+    "seed": 2026
+  },
+  "status": "PREPARED",
+  "summary": "1800 images; train/val/test = 1080/360/360",
+  "terms": "No explicit license is stated on the source page (checked 2026-11-01); the authors ask users to cite their works. FewShotLab never redistributes the images."
+}

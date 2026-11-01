@@ -90,3 +90,68 @@ Each entry records what was decided, why, and what it implies. Newest entries go
   - Ruff handles both lint and format (line length 100).
   - scikit-learn is a dev-only dependency. It serves as an independent oracle in metric tests;
     project metrics are implemented in `fewshotlab.metrics`.
+
+## D-012 (2026-11-01): Flowers102 official files come from Internet Archive captures, MD5-verified
+- **Context:** the official Oxford host did not accept TCP connections from this network.
+- **Decision:** with the user's approval, `data prepare --mirror internet-archive` fetches pinned
+  Internet Archive captures of the three official URLs. It keeps a file only if its MD5 equals
+  torchvision's recorded checksum. All three matched, so the images, labels and split are the
+  verified official ones.
+
+## D-013 (2026-11-01): The user's Kaggle copy is used for verification only
+- **Context:** `flower_data/` is the Udacity re-packaging (6,552 / 818 / 819, unlabeled test),
+  not the official split.
+- **Decision:** `--cross-check` compares it with the official files:
+  - 8,189 / 8,189 images are byte-identical;
+  - 7,370 / 7,370 folder labels agree.
+- Because every label agreed, its `cat_to_name.json` supplies display names (display only;
+  identity stays `label_001..label_102`).
+- The folder is gitignored and never modified.
+
+## D-014 (2026-11-01): The virtualenv lives outside iCloud Drive, with `.venv` a symlink to it
+- **Context:** the project folder is inside the iCloud-synced Desktop. iCloud's file provider sets
+  the macOS `hidden` flag on items inside dot-folders, and Python 3.11.15 skips hidden `.pth` files.
+  The editable install therefore vanished at 19:57.
+- **What did not work:** renaming the folder to `.venv.nosync` did not stop iCloud from finishing
+  its backlog.
+- **Decision:** the environment now lives at `~/.local/share/fewshotlab/venv`, outside the synced
+  folder. `.venv` in the project is a symlink to it, so `uv run` works unchanged.
+- **Recommended:** move the project out of iCloud Drive (for example to `~/Projects`). That also
+  stops roughly 1 GB of data and caches from syncing.
+
+## D-015 (2026-11-01): Operating-system metadata files in archives are ignored and listed
+- **Decision:** `Thumbs.db`, `desktop.ini`, `.DS_Store`, `._*` and `__MACOSX/` are not dataset
+  content. The NEU adapter ignores them, but lists each one in the prepare record, so nothing is
+  dropped silently.
+- **Also:** a validation failure now writes a FAILED prepare record. Download provenance is saved to
+  `data/raw/<dataset>/acquisition.json` before validation, so a re-validation keeps it.
+
+## D-016 (2026-11-01): Duplicates found by the audits are disclosed, not repaired
+- **Flowers102 (official split preserved):**
+  - Byte-identical cross-split pairs: `image_07307` train = `image_07309` test, and
+    `image_08067` test = `image_08077` val.
+  - 6 further cross-split pHash candidates (distance ≤ 4).
+  - 1 cross-class near-identical test pair, `image_07303` / `image_07304`.
+  - Human visual review is pending.
+- **NEU-CLS:** `Pa_101` = `Pa_105` (pixel-identical). The split's cluster rule placed both in test;
+  counts unaffected.
+- Any deduplicated analysis would be a separately named sensitivity protocol.
+
+## D-017 (2026-11-01): Near-duplicate threshold
+- **Decision:** candidates are listed at pHash Hamming distance ≤ 4 of 64 bits for manual review.
+  Each audit also records the pair counts at 0, 2, 4, 6, 8, 10 and 12 bits, so the threshold's
+  effect is visible. Candidates are never removed automatically.
+
+## D-018 (2026-11-01): Supports require a passing audit and are immutable
+- **Decision:** `support build` refuses to run without a PASS audit of the current manifest
+  (identified by its hash).
+- A stored support file is never overwritten. A rebuild that would change a support set is
+  refused; it would need a new protocol version.
+- Class keys in support files are strings and are compared as a set. A string sort put "10" before
+  "2", which broke validation for the 102 Flowers classes. That bug was fixed, with a regression
+  test.
+
+## D-019 (2026-11-01): `weights fetch` command
+- **Decision:** `python -m fewshotlab weights fetch` is an explicit, documented way to cache the
+  ResNet18 IMAGENET1K_V1 weights for offline use. It is in addition to the spec's command list.
+- Every other command still needs `--allow-download` before it may fetch anything.

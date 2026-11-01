@@ -76,9 +76,10 @@ All commands run as `python -m fewshotlab <command>`.
 | Command | Phase | Status |
 |---|---|---|
 | `doctor [--json] [--require-device {cpu,mps,cuda}]` | P0 | implemented |
-| `data prepare --dataset {flowers102,neu_cls} [--source PATH] [--allow-download]` | P1 | not implemented yet (exit 3) |
-| `data audit --dataset {flowers102,neu_cls}` | P1 | not implemented yet |
-| `support build --config PATH [--dataset ...]` | P1 | not implemented yet |
+| `data prepare --dataset {flowers102,neu_cls} [--source PATH] [--allow-download] [--mirror internet-archive] [--cross-check PATH]` | P1 | implemented |
+| `data audit --dataset {flowers102,neu_cls} [--near-dup-threshold BITS]` | P1 | implemented |
+| `support build --config PATH [--dataset ...]` | P1 | implemented |
+| `weights fetch` | P2 | implemented (explicit download of ResNet18 IMAGENET1K_V1) |
 | `train --config PATH [--device ...] [--allow-download]` | P3 | not implemented yet |
 | `evaluate --run RUN_ID --split {val,test} [--device ...]` | P3 / P5 | not implemented yet |
 | `benchmark --config PATH [--dry-run]` | P4 / P5 | not implemented yet |
@@ -123,5 +124,6 @@ is given `--allow-download`.
 ## Data, weights and licensing
 
 No images, model weights or run outputs are committed. Datasets are acquired from their
-original sources under their own terms (see the data cards added in P1). No license has been
-chosen for this code yet.
+original sources under their own terms; see [docs/DATA_CARD_flowers102.md](docs/DATA_CARD_flowers102.md)
+and [docs/DATA_CARD_neu_cls.md](docs/DATA_CARD_neu_cls.md), and the generated
+[reports/label_budget.md](reports/label_budget.md). No license has been chosen for this code yet.

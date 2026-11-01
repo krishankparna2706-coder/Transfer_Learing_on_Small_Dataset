@@ -1,0 +1,69 @@
+{
+  "class_map_sha256": "2788b023a33f8359db75c7154dd335c3e21adc9fd2eac9f33a8dac163241fceb",
+  "content_sha256": "02efc9100d3e5c60ec6f296a292a145e2178985e910102f0d64dbecd5d761706",
+  "created_utc": "2026-11-01T14:31:53Z",
+  "dataset": "neu_cls",
+  "k": 5,
+  "n_images": 30,
+  "numpy_version": "2.4.6",
+  "protocol_id": "fewshotlab-v1",
+  "rng": {
+    "bit_generator": "numpy.random.PCG64",
+    "derivation": "uint64 = first 8 bytes (big-endian) of SHA-256 over the canonical JSON label list",
+    "ordering": "image_id ascending within each class, then permuted",
+    "seed_labels": [
+      "neu_cls",
+      "support",
+      11,
+      "<class_id>"
+    ]
+  },
+  "schema_version": 1,
+  "seed": 11,
+  "selected": {
+    "0": [
+      "neu_cls/RS_139",
+      "neu_cls/RS_71",
+      "neu_cls/RS_149",
+      "neu_cls/RS_19",
+      "neu_cls/RS_63"
+    ],
+    "1": [
+      "neu_cls/Pa_62",
+      "neu_cls/Pa_188",
+      "neu_cls/Pa_71",
+      "neu_cls/Pa_61",
+      "neu_cls/Pa_146"
+    ],
+    "2": [
+      "neu_cls/Cr_121",
+      "neu_cls/Cr_131",
+      "neu_cls/Cr_161",
+      "neu_cls/Cr_214",
+      "neu_cls/Cr_296"
+    ],
+    "3": [
+      "neu_cls/PS_286",
+      "neu_cls/PS_22",
+      "neu_cls/PS_83",
+      "neu_cls/PS_229",
+      "neu_cls/PS_175"
+    ],
+    "4": [
+      "neu_cls/In_50",
+      "neu_cls/In_206",
+      "neu_cls/In_40",
+      "neu_cls/In_32",
+      "neu_cls/In_93"
+    ],
+    "5": [
+      "neu_cls/Sc_203",
+      "neu_cls/Sc_218",
+      "neu_cls/Sc_23",
+      "neu_cls/Sc_136",
+      "neu_cls/Sc_191"
+    ]
+  },
+  "split_manifest": "neu_cls-v1.csv",
+  "split_manifest_sha256": "2f4740b0b0167ed3ef95421b53da671724755ed918ed09f53912c51b4aa477ca"
+}

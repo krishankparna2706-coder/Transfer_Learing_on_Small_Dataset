@@ -13,6 +13,7 @@ from collections.abc import Callable, Sequence
 
 from fewshotlab import PROTOCOL_ID, __version__
 from fewshotlab.errors import FewShotLabError, NotImplementedPhaseError
+from fewshotlab.status import ExitCode
 
 DATASET_CHOICES = ("flowers102", "neu_cls")
 DEVICE_CHOICES = ("auto", "cpu", "mps", "cuda")
@@ -42,6 +43,84 @@ def _run_doctor(args: argparse.Namespace) -> int:
     from fewshotlab.doctor import run_doctor
 
     return run_doctor(as_json=args.json, require_device=args.require_device)
+
+
+def _run_data_prepare(args: argparse.Namespace) -> int:
+    from fewshotlab.data.prepare import prepare_dataset
+
+    record = prepare_dataset(
+        args.dataset,
+        source=args.source,
+        allow_download=args.allow_download,
+        mirror=args.mirror,
+        cross_check=args.cross_check,
+    )
+    print(f"{args.dataset}: {record['status']}: {record['summary']}")
+    print(f"manifest: {record['manifest']['path']} sha256 {record['manifest']['sha256']}")
+    print(f"next: python -m fewshotlab data audit --dataset {args.dataset}")
+    return ExitCode.OK
+
+
+def _run_data_audit(args: argparse.Namespace) -> int:
+    from fewshotlab.data.audit import run_audit
+    from fewshotlab.data.registry import audit_dir
+    from fewshotlab.paths import get_paths
+
+    report = run_audit(args.dataset, near_dup_threshold=args.near_dup_threshold)
+    near = report["near_duplicates"]
+    exact = report["exact_duplicates"]
+    print(
+        f"{args.dataset} audit: {report['status']} ({report['manifest']['rows']} images, "
+        f"manifest sha256 {report['manifest']['sha256'][:12]})"
+    )
+    print(
+        f"  integrity failures {len(report['integrity_failures'])}, decode failures "
+        f"{len(report['decode_failures'])}"
+    )
+    print(
+        f"  exact-duplicate groups {exact['pixel_identical_groups']} "
+        f"(cross-split {len(exact['cross_split_groups'])})"
+    )
+    print(
+        f"  near-duplicate candidates <= {near['threshold']} bits: "
+        f"{near['pairs_within_threshold']} (cross-split {near['cross_split_pairs']})"
+    )
+    for finding in report["findings"]:
+        print(f"  finding: {finding}")
+    print(f"  report: {audit_dir(get_paths(), args.dataset) / 'data_audit.md'}")
+    return ExitCode.OK if report["status"] == "PASS" else ExitCode.FAILURE
+
+
+def _run_support_build(args: argparse.Namespace) -> int:
+    from fewshotlab.data.support import build_from_config
+
+    summary = build_from_config(args.config, dataset=args.dataset)
+    for name, info in summary["datasets"].items():
+        if info["status"] != "BUILT":
+            print(f"{name}: {info['status']}; no supports built (prepare and audit it first)")
+            continue
+        states: dict[str, int] = {}
+        for item in info["built"]:
+            states[item["state"]] = states.get(item["state"], 0) + 1
+        print(
+            f"{name}: {len(info['built'])} support manifests for K={list(summary['shots'])} "
+            f"x seeds={list(summary['seeds'])} ({states})"
+        )
+    print(f"label budget: {summary['label_budget_report']}")
+    if summary["missing"]:
+        print(f"blocked datasets: {summary['missing']}", file=sys.stderr)
+        return ExitCode.BLOCKED
+    return ExitCode.OK
+
+
+def _run_weights_fetch(args: argparse.Namespace) -> int:
+    from fewshotlab.models.backbone import ensure_imagenet_weights
+    from fewshotlab.paths import get_paths
+
+    path, info = ensure_imagenet_weights(get_paths().weights_dir, allow_download=True)
+    print(f"ResNet18 {info.weights_id}: {path}")
+    print(f"sha256 {info.sha256} (matches torchvision's file-name prefix)")
+    return ExitCode.OK
 
 
 def _command(
@@ -98,8 +177,9 @@ def build_parser() -> argparse.ArgumentParser:
         data_sub,
         "prepare",
         "data prepare",
-        "Acquire an original dataset and write its immutable manifest.",
-        _not_implemented("data prepare", "P1", "dataset acquisition and manifests"),
+        "Acquire an original dataset and write its immutable manifest. Exits 4 and "
+        "records BLOCKED when the original source is unreachable.",
+        _run_data_prepare,
     )
     p.add_argument("--dataset", required=True, choices=DATASET_CHOICES)
     p.add_argument(
@@ -113,14 +193,37 @@ def build_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="permit fetching the original files from the official source",
     )
+    p.add_argument(
+        "--mirror",
+        choices=("internet-archive",),
+        default=None,
+        help="flowers102 only: fetch Internet Archive captures of the official URLs (needs "
+        "--allow-download; files are kept only if their MD5 matches torchvision's record)",
+    )
+    p.add_argument(
+        "--cross-check",
+        metavar="PATH",
+        default=None,
+        help="flowers102 only: compare a re-packaged copy (e.g. Kaggle) with the official files; "
+        "the copy is only read, never used to build the manifest",
+    )
     p = _command(
         data_sub,
         "audit",
         "data audit",
-        "Audit integrity, duplicates, near-duplicates and split separation.",
-        _not_implemented("data audit", "P1", "dataset audit"),
+        "Audit integrity, exact duplicates, near-duplicate candidates and split "
+        "separation; writes reports/data_audit/<dataset>/.",
+        _run_data_audit,
     )
     p.add_argument("--dataset", required=True, choices=DATASET_CHOICES)
+    p.add_argument(
+        "--near-dup-threshold",
+        type=int,
+        default=4,
+        metavar="BITS",
+        help="maximum pHash Hamming distance (of 64 bits) listed as a near-duplicate "
+        "candidate for manual review (default: 4)",
+    )
 
     support = sub.add_parser(
         "support",
@@ -134,20 +237,38 @@ def build_parser() -> argparse.ArgumentParser:
         support_sub,
         "build",
         "support build",
-        "Build nested K-shot support manifests for every seed.",
-        _not_implemented("support build", "P1", "nested support manifests"),
+        "Build nested K-shot support manifests for every seed (requires a prepared and "
+        "audited dataset).",
+        _run_support_build,
     )
     p.add_argument(
         "--config",
         required=True,
         metavar="PATH",
-        help="protocol or study config listing datasets, shots and seeds",
+        help="protocol config listing datasets, shots and seeds (e.g. configs/protocol-v1.yaml)",
     )
     p.add_argument(
         "--dataset",
         choices=DATASET_CHOICES,
         default=None,
         help="limit to one dataset (default: every dataset in the config)",
+    )
+
+    weights = sub.add_parser(
+        "weights",
+        help="Pretrained weight cache.",
+        description="Pretrained weight cache.",
+    )
+    weights_sub = weights.add_subparsers(
+        dest="weights_command", metavar="<weights-command>", required=True
+    )
+    _command(
+        weights_sub,
+        "fetch",
+        "weights fetch",
+        "Download ResNet18 IMAGENET1K_V1 weights into the project cache once (an explicit "
+        "download; verified against torchvision's SHA-256 file-name prefix).",
+        _run_weights_fetch,
     )
 
     p = _command(

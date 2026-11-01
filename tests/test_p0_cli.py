@@ -9,8 +9,8 @@ from helpers import run_module, snapshot_files
 
 DOCUMENTED_FLAGS = {
     ("doctor",): ["--json", "--require-device"],
-    ("data", "prepare"): ["--dataset", "--source", "--allow-download"],
-    ("data", "audit"): ["--dataset"],
+    ("data", "prepare"): ["--dataset", "--source", "--allow-download", "--mirror", "--cross-check"],
+    ("data", "audit"): ["--dataset", "--near-dup-threshold"],
     ("support", "build"): ["--config", "--dataset"],
     ("train",): ["--config", "--device", "--allow-download"],
     ("evaluate",): ["--run", "--split", "--device"],
@@ -22,9 +22,6 @@ DOCUMENTED_FLAGS = {
 
 # Commands that are still stubs in this phase, with the phase that implements them.
 STUBS = {
-    "data prepare": (["data", "prepare", "--dataset", "flowers102"], "P1"),
-    "data audit": (["data", "audit", "--dataset", "neu_cls"], "P1"),
-    "support build": (["support", "build", "--config", "configs/protocol-v1.yaml"], "P1"),
     "train": (["train", "--config", "configs/not-used.yaml"], "P3"),
     "evaluate val": (["evaluate", "--run", "some-run", "--split", "val"], "P3"),
     "evaluate test": (["evaluate", "--run", "some-run", "--split", "test"], "P3"),

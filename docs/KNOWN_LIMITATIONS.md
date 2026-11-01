@@ -32,9 +32,19 @@ This list states what FewShotLab cannot claim. It is updated as phases add evide
 ## Environment and access (observed 2026-11-01)
 
 - The Python 3.11 lock uses numpy 2.4.6 and scipy 1.17.1, because newer releases require 3.12.
-- The Oxford Flowers102 hosts (`www.robots.ox.ac.uk`, `thor.robots.ox.ac.uk`) resolve in DNS, but
-  TCP connections from this network time out, while other hosts respond. Flowers acquisition may
-  therefore be BLOCKED in P1. No substitute source will be used.
-- The GitHub account used here has read-only access to the project repository, so pushes are
-  BLOCKED until write access is granted.
+- The official Oxford host was unreachable from this network. The Flowers102 files came from
+  Internet Archive captures of the official URLs, accepted only after an exact MD5 match with
+  torchvision's record (D-012).
+- The Flowers102 usage terms could not be re-checked online. NEU-CLS states no explicit license;
+  its authors ask users to cite their work. Neither dataset is redistributed.
+- **Audit findings:**
+  - The Flowers102 official split contains 2 byte-identical cross-split pairs (one of them
+    train↔test), 6 further cross-split near-duplicate candidates, and 1 near-identical pair with
+    different labels.
+  - NEU-CLS test (patches) contains one pixel-identical pair.
+  - Human visual review of the candidates is pending (D-016).
+- The project folder sits in iCloud Drive. The virtualenv was moved outside it
+  (`~/.local/share/fewshotlab/venv`, linked as `.venv`) to keep Python working (D-014). Raw data
+  and caches inside the project still sync, and may be evicted to the cloud by macOS storage
+  optimization.
 - No license has been chosen for the code yet.

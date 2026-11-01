@@ -38,3 +38,13 @@ runs/*
 
 # --- Streamlit secrets (none are used; ignored defensively) ----------------
 .streamlit/secrets.toml
+
+# --- User-supplied dataset copies at the repo root: never committed ---------
+/flower_data/
+
+# --- iCloud Drive: the real virtualenv lives in .venv.nosync (excluded from sync); .venv is a symlink
+/.venv
+/.venv.nosync/
+
+# --- Regenerable per-image audit tables (large)
+reports/data_audit/*/image_audit.csv

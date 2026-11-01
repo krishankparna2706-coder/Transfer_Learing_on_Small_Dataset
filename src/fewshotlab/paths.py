@@ -85,3 +85,13 @@ def get_paths() -> ProjectPaths:
         cache=_env_path(ENV_CACHE_DIR, root / ".cache"),
         demo_assets=_env_path(ENV_DEMO_ASSETS_DIR, root / "demo_assets"),
     )
+
+
+def portable_path(path: str | Path) -> str:
+    """A path safe to record in tracked files: relative to the project root when inside it,
+    otherwise only its final component (absolute local paths are never recorded)."""
+    resolved = Path(path).expanduser().resolve()
+    try:
+        return resolved.relative_to(find_project_root().resolve()).as_posix()
+    except (ValueError, FewShotLabError):
+        return f"<outside project>/{resolved.name}"

@@ -1,0 +1,38 @@
+{
+  "class_map_sha256": "2788b023a33f8359db75c7154dd335c3e21adc9fd2eac9f33a8dac163241fceb",
+  "classes": [
+    {
+      "class_id": 0,
+      "class_name": "rolled-in_scale",
+      "code": "RS"
+    },
+    {
+      "class_id": 1,
+      "class_name": "patches",
+      "code": "Pa"
+    },
+    {
+      "class_id": 2,
+      "class_name": "crazing",
+      "code": "Cr"
+    },
+    {
+      "class_id": 3,
+      "class_name": "pitted_surface",
+      "code": "PS"
+    },
+    {
+      "class_id": 4,
+      "class_name": "inclusion",
+      "code": "In"
+    },
+    {
+      "class_id": 5,
+      "class_name": "scratches",
+      "code": "Sc"
+    }
+  ],
+  "dataset": "neu_cls",
+  "notes": "Class order follows the source page listing (RS, Pa, Cr, PS, In, Sc); it is fixed explicitly, never inferred from folder order. There is no normal/good class.",
+  "schema_version": 1
+}

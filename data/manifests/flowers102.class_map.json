@@ -1,0 +1,620 @@
+{
+  "class_map_sha256": "89aa72740be1596d831d08931cf1d684991eb8fc2f9e90f639042038e56b2cff",
+  "classes": [
+    {
+      "class_id": 0,
+      "class_name": "label_001",
+      "display_name": "pink primrose",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 1,
+      "class_name": "label_002",
+      "display_name": "hard-leaved pocket orchid",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 2,
+      "class_name": "label_003",
+      "display_name": "canterbury bells",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 3,
+      "class_name": "label_004",
+      "display_name": "sweet pea",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 4,
+      "class_name": "label_005",
+      "display_name": "english marigold",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 5,
+      "class_name": "label_006",
+      "display_name": "tiger lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 6,
+      "class_name": "label_007",
+      "display_name": "moon orchid",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 7,
+      "class_name": "label_008",
+      "display_name": "bird of paradise",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 8,
+      "class_name": "label_009",
+      "display_name": "monkshood",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 9,
+      "class_name": "label_010",
+      "display_name": "globe thistle",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 10,
+      "class_name": "label_011",
+      "display_name": "snapdragon",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 11,
+      "class_name": "label_012",
+      "display_name": "colt's foot",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 12,
+      "class_name": "label_013",
+      "display_name": "king protea",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 13,
+      "class_name": "label_014",
+      "display_name": "spear thistle",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 14,
+      "class_name": "label_015",
+      "display_name": "yellow iris",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 15,
+      "class_name": "label_016",
+      "display_name": "globe-flower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 16,
+      "class_name": "label_017",
+      "display_name": "purple coneflower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 17,
+      "class_name": "label_018",
+      "display_name": "peruvian lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 18,
+      "class_name": "label_019",
+      "display_name": "balloon flower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 19,
+      "class_name": "label_020",
+      "display_name": "giant white arum lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 20,
+      "class_name": "label_021",
+      "display_name": "fire lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 21,
+      "class_name": "label_022",
+      "display_name": "pincushion flower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 22,
+      "class_name": "label_023",
+      "display_name": "fritillary",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 23,
+      "class_name": "label_024",
+      "display_name": "red ginger",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 24,
+      "class_name": "label_025",
+      "display_name": "grape hyacinth",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 25,
+      "class_name": "label_026",
+      "display_name": "corn poppy",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 26,
+      "class_name": "label_027",
+      "display_name": "prince of wales feathers",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 27,
+      "class_name": "label_028",
+      "display_name": "stemless gentian",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 28,
+      "class_name": "label_029",
+      "display_name": "artichoke",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 29,
+      "class_name": "label_030",
+      "display_name": "sweet william",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 30,
+      "class_name": "label_031",
+      "display_name": "carnation",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 31,
+      "class_name": "label_032",
+      "display_name": "garden phlox",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 32,
+      "class_name": "label_033",
+      "display_name": "love in the mist",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 33,
+      "class_name": "label_034",
+      "display_name": "mexican aster",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 34,
+      "class_name": "label_035",
+      "display_name": "alpine sea holly",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 35,
+      "class_name": "label_036",
+      "display_name": "ruby-lipped cattleya",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 36,
+      "class_name": "label_037",
+      "display_name": "cape flower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 37,
+      "class_name": "label_038",
+      "display_name": "great masterwort",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 38,
+      "class_name": "label_039",
+      "display_name": "siam tulip",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 39,
+      "class_name": "label_040",
+      "display_name": "lenten rose",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 40,
+      "class_name": "label_041",
+      "display_name": "barbeton daisy",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 41,
+      "class_name": "label_042",
+      "display_name": "daffodil",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 42,
+      "class_name": "label_043",
+      "display_name": "sword lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 43,
+      "class_name": "label_044",
+      "display_name": "poinsettia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 44,
+      "class_name": "label_045",
+      "display_name": "bolero deep blue",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 45,
+      "class_name": "label_046",
+      "display_name": "wallflower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 46,
+      "class_name": "label_047",
+      "display_name": "marigold",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 47,
+      "class_name": "label_048",
+      "display_name": "buttercup",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 48,
+      "class_name": "label_049",
+      "display_name": "oxeye daisy",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 49,
+      "class_name": "label_050",
+      "display_name": "common dandelion",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 50,
+      "class_name": "label_051",
+      "display_name": "petunia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 51,
+      "class_name": "label_052",
+      "display_name": "wild pansy",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 52,
+      "class_name": "label_053",
+      "display_name": "primula",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 53,
+      "class_name": "label_054",
+      "display_name": "sunflower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 54,
+      "class_name": "label_055",
+      "display_name": "pelargonium",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 55,
+      "class_name": "label_056",
+      "display_name": "bishop of llandaff",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 56,
+      "class_name": "label_057",
+      "display_name": "gaura",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 57,
+      "class_name": "label_058",
+      "display_name": "geranium",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 58,
+      "class_name": "label_059",
+      "display_name": "orange dahlia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 59,
+      "class_name": "label_060",
+      "display_name": "pink-yellow dahlia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 60,
+      "class_name": "label_061",
+      "display_name": "cautleya spicata",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 61,
+      "class_name": "label_062",
+      "display_name": "japanese anemone",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 62,
+      "class_name": "label_063",
+      "display_name": "black-eyed susan",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 63,
+      "class_name": "label_064",
+      "display_name": "silverbush",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 64,
+      "class_name": "label_065",
+      "display_name": "californian poppy",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 65,
+      "class_name": "label_066",
+      "display_name": "osteospermum",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 66,
+      "class_name": "label_067",
+      "display_name": "spring crocus",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 67,
+      "class_name": "label_068",
+      "display_name": "bearded iris",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 68,
+      "class_name": "label_069",
+      "display_name": "windflower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 69,
+      "class_name": "label_070",
+      "display_name": "tree poppy",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 70,
+      "class_name": "label_071",
+      "display_name": "gazania",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 71,
+      "class_name": "label_072",
+      "display_name": "azalea",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 72,
+      "class_name": "label_073",
+      "display_name": "water lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 73,
+      "class_name": "label_074",
+      "display_name": "rose",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 74,
+      "class_name": "label_075",
+      "display_name": "thorn apple",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 75,
+      "class_name": "label_076",
+      "display_name": "morning glory",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 76,
+      "class_name": "label_077",
+      "display_name": "passion flower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 77,
+      "class_name": "label_078",
+      "display_name": "lotus",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 78,
+      "class_name": "label_079",
+      "display_name": "toad lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 79,
+      "class_name": "label_080",
+      "display_name": "anthurium",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 80,
+      "class_name": "label_081",
+      "display_name": "frangipani",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 81,
+      "class_name": "label_082",
+      "display_name": "clematis",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 82,
+      "class_name": "label_083",
+      "display_name": "hibiscus",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 83,
+      "class_name": "label_084",
+      "display_name": "columbine",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 84,
+      "class_name": "label_085",
+      "display_name": "desert-rose",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 85,
+      "class_name": "label_086",
+      "display_name": "tree mallow",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 86,
+      "class_name": "label_087",
+      "display_name": "magnolia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 87,
+      "class_name": "label_088",
+      "display_name": "cyclamen",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 88,
+      "class_name": "label_089",
+      "display_name": "watercress",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 89,
+      "class_name": "label_090",
+      "display_name": "canna lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 90,
+      "class_name": "label_091",
+      "display_name": "hippeastrum",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 91,
+      "class_name": "label_092",
+      "display_name": "bee balm",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 92,
+      "class_name": "label_093",
+      "display_name": "ball moss",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 93,
+      "class_name": "label_094",
+      "display_name": "foxglove",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 94,
+      "class_name": "label_095",
+      "display_name": "bougainvillea",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 95,
+      "class_name": "label_096",
+      "display_name": "camellia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 96,
+      "class_name": "label_097",
+      "display_name": "mallow",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 97,
+      "class_name": "label_098",
+      "display_name": "mexican petunia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 98,
+      "class_name": "label_099",
+      "display_name": "bromelia",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 99,
+      "class_name": "label_100",
+      "display_name": "blanket flower",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 100,
+      "class_name": "label_101",
+      "display_name": "trumpet creeper",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    },
+    {
+      "class_id": 101,
+      "class_name": "label_102",
+      "display_name": "blackberry lily",
+      "display_name_source": "cat_to_name.json in the user-supplied Udacity/Kaggle copy (secondary source; display only)"
+    }
+  ],
+  "dataset": "flowers102",
+  "notes": "class_id = official MAT label - 1. Names label_001..label_102 keep the official 1-based label number. Human-readable flower names are optional display metadata from a secondary source and are never used as identity.",
+  "schema_version": 1
+}

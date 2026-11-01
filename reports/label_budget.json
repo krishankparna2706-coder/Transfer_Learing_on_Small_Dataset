@@ -1,0 +1,91 @@
+{
+  "datasets": {
+    "flowers102": {
+      "classes": 102,
+      "per_k": {
+        "1": {
+          "fit_labels": 102,
+          "held_out_test_images": 6149,
+          "support_files": 5,
+          "support_n_images_stored": [
+            102
+          ],
+          "validation_labels": 1020
+        },
+        "10": {
+          "fit_labels": 1020,
+          "held_out_test_images": 6149,
+          "support_files": 5,
+          "support_n_images_stored": [
+            1020
+          ],
+          "validation_labels": 1020
+        },
+        "3": {
+          "fit_labels": 306,
+          "held_out_test_images": 6149,
+          "support_files": 5,
+          "support_n_images_stored": [
+            306
+          ],
+          "validation_labels": 1020
+        },
+        "5": {
+          "fit_labels": 510,
+          "held_out_test_images": 6149,
+          "support_files": 5,
+          "support_n_images_stored": [
+            510
+          ],
+          "validation_labels": 1020
+        }
+      },
+      "status": "PREPARED",
+      "train_pool": 1020
+    },
+    "neu_cls": {
+      "classes": 6,
+      "per_k": {
+        "1": {
+          "fit_labels": 6,
+          "held_out_test_images": 360,
+          "support_files": 5,
+          "support_n_images_stored": [
+            6
+          ],
+          "validation_labels": 360
+        },
+        "10": {
+          "fit_labels": 60,
+          "held_out_test_images": 360,
+          "support_files": 5,
+          "support_n_images_stored": [
+            60
+          ],
+          "validation_labels": 360
+        },
+        "3": {
+          "fit_labels": 18,
+          "held_out_test_images": 360,
+          "support_files": 5,
+          "support_n_images_stored": [
+            18
+          ],
+          "validation_labels": 360
+        },
+        "5": {
+          "fit_labels": 30,
+          "held_out_test_images": 360,
+          "support_files": 5,
+          "support_n_images_stored": [
+            30
+          ],
+          "validation_labels": 360
+        }
+      },
+      "status": "PREPARED",
+      "train_pool": 1080
+    }
+  },
+  "generated_utc": "2026-11-01T14:31:53Z"
+}

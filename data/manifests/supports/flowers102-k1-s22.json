@@ -1,0 +1,333 @@
+{
+  "class_map_sha256": "89aa72740be1596d831d08931cf1d684991eb8fc2f9e90f639042038e56b2cff",
+  "content_sha256": "17743f2cddcd224ac362e8c23c65db69ae4b06655d4903b4622a275e105bf4c3",
+  "created_utc": "2026-11-01T14:31:53Z",
+  "dataset": "flowers102",
+  "k": 1,
+  "n_images": 102,
+  "numpy_version": "2.4.6",
+  "protocol_id": "fewshotlab-v1",
+  "rng": {
+    "bit_generator": "numpy.random.PCG64",
+    "derivation": "uint64 = first 8 bytes (big-endian) of SHA-256 over the canonical JSON label list",
+    "ordering": "image_id ascending within each class, then permuted",
+    "seed_labels": [
+      "flowers102",
+      "support",
+      22,
+      "<class_id>"
+    ]
+  },
+  "schema_version": 1,
+  "seed": 22,
+  "selected": {
+    "0": [
+      "flowers102/image_06741"
+    ],
+    "1": [
+      "flowers102/image_05124"
+    ],
+    "10": [
+      "flowers102/image_03117"
+    ],
+    "100": [
+      "flowers102/image_07963"
+    ],
+    "101": [
+      "flowers102/image_08004"
+    ],
+    "11": [
+      "flowers102/image_04036"
+    ],
+    "12": [
+      "flowers102/image_05787"
+    ],
+    "13": [
+      "flowers102/image_06052"
+    ],
+    "14": [
+      "flowers102/image_06368"
+    ],
+    "15": [
+      "flowers102/image_06689"
+    ],
+    "16": [
+      "flowers102/image_03875"
+    ],
+    "17": [
+      "flowers102/image_04300"
+    ],
+    "18": [
+      "flowers102/image_06170"
+    ],
+    "19": [
+      "flowers102/image_04945"
+    ],
+    "2": [
+      "flowers102/image_06632"
+    ],
+    "20": [
+      "flowers102/image_06781"
+    ],
+    "21": [
+      "flowers102/image_05344"
+    ],
+    "22": [
+      "flowers102/image_03440"
+    ],
+    "23": [
+      "flowers102/image_06832"
+    ],
+    "24": [
+      "flowers102/image_06578"
+    ],
+    "25": [
+      "flowers102/image_06524"
+    ],
+    "26": [
+      "flowers102/image_06856"
+    ],
+    "27": [
+      "flowers102/image_05226"
+    ],
+    "28": [
+      "flowers102/image_04127"
+    ],
+    "29": [
+      "flowers102/image_03488"
+    ],
+    "3": [
+      "flowers102/image_05670"
+    ],
+    "30": [
+      "flowers102/image_08075"
+    ],
+    "31": [
+      "flowers102/image_05616"
+    ],
+    "32": [
+      "flowers102/image_06449"
+    ],
+    "33": [
+      "flowers102/image_06947"
+    ],
+    "34": [
+      "flowers102/image_08086"
+    ],
+    "35": [
+      "flowers102/image_04358"
+    ],
+    "36": [
+      "flowers102/image_03811"
+    ],
+    "37": [
+      "flowers102/image_05832"
+    ],
+    "38": [
+      "flowers102/image_07010"
+    ],
+    "39": [
+      "flowers102/image_04573"
+    ],
+    "4": [
+      "flowers102/image_05194"
+    ],
+    "40": [
+      "flowers102/image_02191"
+    ],
+    "41": [
+      "flowers102/image_05740"
+    ],
+    "42": [
+      "flowers102/image_02420"
+    ],
+    "43": [
+      "flowers102/image_01566"
+    ],
+    "44": [
+      "flowers102/image_07135"
+    ],
+    "45": [
+      "flowers102/image_01019"
+    ],
+    "46": [
+      "flowers102/image_04968"
+    ],
+    "47": [
+      "flowers102/image_04689"
+    ],
+    "48": [
+      "flowers102/image_06237"
+    ],
+    "49": [
+      "flowers102/image_06310"
+    ],
+    "5": [
+      "flowers102/image_08108"
+    ],
+    "50": [
+      "flowers102/image_03967"
+    ],
+    "51": [
+      "flowers102/image_04215"
+    ],
+    "52": [
+      "flowers102/image_03667"
+    ],
+    "53": [
+      "flowers102/image_05407"
+    ],
+    "54": [
+      "flowers102/image_04758"
+    ],
+    "55": [
+      "flowers102/image_02848"
+    ],
+    "56": [
+      "flowers102/image_08122"
+    ],
+    "57": [
+      "flowers102/image_02689"
+    ],
+    "58": [
+      "flowers102/image_05071"
+    ],
+    "59": [
+      "flowers102/image_02944"
+    ],
+    "6": [
+      "flowers102/image_08103"
+    ],
+    "60": [
+      "flowers102/image_06256"
+    ],
+    "61": [
+      "flowers102/image_07274"
+    ],
+    "62": [
+      "flowers102/image_05897"
+    ],
+    "63": [
+      "flowers102/image_06144"
+    ],
+    "64": [
+      "flowers102/image_03215"
+    ],
+    "65": [
+      "flowers102/image_05538"
+    ],
+    "66": [
+      "flowers102/image_07063"
+    ],
+    "67": [
+      "flowers102/image_05906"
+    ],
+    "68": [
+      "flowers102/image_05997"
+    ],
+    "69": [
+      "flowers102/image_05306"
+    ],
+    "7": [
+      "flowers102/image_03356"
+    ],
+    "70": [
+      "flowers102/image_04491"
+    ],
+    "71": [
+      "flowers102/image_03619"
+    ],
+    "72": [
+      "flowers102/image_00411"
+    ],
+    "73": [
+      "flowers102/image_01254"
+    ],
+    "74": [
+      "flowers102/image_02182"
+    ],
+    "75": [
+      "flowers102/image_02519"
+    ],
+    "76": [
+      "flowers102/image_00144"
+    ],
+    "77": [
+      "flowers102/image_01918"
+    ],
+    "78": [
+      "flowers102/image_06704"
+    ],
+    "79": [
+      "flowers102/image_01990"
+    ],
+    "8": [
+      "flowers102/image_06423"
+    ],
+    "80": [
+      "flowers102/image_00888"
+    ],
+    "81": [
+      "flowers102/image_01691"
+    ],
+    "82": [
+      "flowers102/image_01816"
+    ],
+    "83": [
+      "flowers102/image_02554"
+    ],
+    "84": [
+      "flowers102/image_04776"
+    ],
+    "85": [
+      "flowers102/image_02884"
+    ],
+    "86": [
+      "flowers102/image_05461"
+    ],
+    "87": [
+      "flowers102/image_00485"
+    ],
+    "88": [
+      "flowers102/image_00667"
+    ],
+    "89": [
+      "flowers102/image_04443"
+    ],
+    "9": [
+      "flowers102/image_07117"
+    ],
+    "90": [
+      "flowers102/image_04851"
+    ],
+    "91": [
+      "flowers102/image_03093"
+    ],
+    "92": [
+      "flowers102/image_06017"
+    ],
+    "93": [
+      "flowers102/image_07307"
+    ],
+    "94": [
+      "flowers102/image_07587"
+    ],
+    "95": [
+      "flowers102/image_07653"
+    ],
+    "96": [
+      "flowers102/image_07741"
+    ],
+    "97": [
+      "flowers102/image_07781"
+    ],
+    "98": [
+      "flowers102/image_07871"
+    ],
+    "99": [
+      "flowers102/image_07934"
+    ]
+  },
+  "split_manifest": "flowers102-v1.csv",
+  "split_manifest_sha256": "886cf59e92473be726096c16975e82804df0ebe18045274da891ad3747651283"
+}

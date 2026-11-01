@@ -1,0 +1,2 @@
+image_id_a,split_a,class_a,image_id_b,split_b,class_b,hamming,same_class,cross_split
+neu_cls/Pa_101,test,1,neu_cls/Pa_105,test,1,0,True,False

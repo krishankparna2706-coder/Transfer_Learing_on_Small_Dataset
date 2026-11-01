@@ -1,0 +1,45 @@
+{
+  "class_map_sha256": "2788b023a33f8359db75c7154dd335c3e21adc9fd2eac9f33a8dac163241fceb",
+  "content_sha256": "b2cdf5db86347c3c8042a2e88aa92d337ea0fa5fe1255dc51049f8855247e591",
+  "created_utc": "2026-11-01T14:31:53Z",
+  "dataset": "neu_cls",
+  "k": 1,
+  "n_images": 6,
+  "numpy_version": "2.4.6",
+  "protocol_id": "fewshotlab-v1",
+  "rng": {
+    "bit_generator": "numpy.random.PCG64",
+    "derivation": "uint64 = first 8 bytes (big-endian) of SHA-256 over the canonical JSON label list",
+    "ordering": "image_id ascending within each class, then permuted",
+    "seed_labels": [
+      "neu_cls",
+      "support",
+      33,
+      "<class_id>"
+    ]
+  },
+  "schema_version": 1,
+  "seed": 33,
+  "selected": {
+    "0": [
+      "neu_cls/RS_121"
+    ],
+    "1": [
+      "neu_cls/Pa_78"
+    ],
+    "2": [
+      "neu_cls/Cr_197"
+    ],
+    "3": [
+      "neu_cls/PS_2"
+    ],
+    "4": [
+      "neu_cls/In_52"
+    ],
+    "5": [
+      "neu_cls/Sc_185"
+    ]
+  },
+  "split_manifest": "neu_cls-v1.csv",
+  "split_manifest_sha256": "2f4740b0b0167ed3ef95421b53da671724755ed918ed09f53912c51b4aa477ca"
+}

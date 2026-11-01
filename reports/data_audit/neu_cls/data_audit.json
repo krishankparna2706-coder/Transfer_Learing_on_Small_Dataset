@@ -1,0 +1,102 @@
+{
+  "audit_version": 1,
+  "class_map_sha256": "2788b023a33f8359db75c7154dd335c3e21adc9fd2eac9f33a8dac163241fceb",
+  "counts": {
+    "test": 360,
+    "train": 1080,
+    "val": 360
+  },
+  "dataset": "neu_cls",
+  "decode_failures": [],
+  "dimensions_top": {
+    "200x200": 1800
+  },
+  "distinct_dimensions": 1,
+  "exact_duplicates": {
+    "byte_identical_groups": 1,
+    "cross_class_groups": [],
+    "cross_split_groups": [],
+    "pixel_identical_groups": 1
+  },
+  "exclusions": [],
+  "findings": [
+    "no acquisition-group metadata is available; splits are image-level"
+  ],
+  "formats": {
+    "BMP": 1800
+  },
+  "generated_utc": "2026-11-01T14:26:46Z",
+  "groups": {
+    "consequence": "image-level splits cannot establish generalization to new acquisition groups (lines, coils, cameras)",
+    "metadata": "none available from the source"
+  },
+  "integrity_failures": [],
+  "manifest": {
+    "path": "neu_cls-v1.csv",
+    "rows": 1800,
+    "sha256": "2f4740b0b0167ed3ef95421b53da671724755ed918ed09f53912c51b4aa477ca"
+  },
+  "modes": {
+    "L": 1800
+  },
+  "near_duplicates": {
+    "cross_class_pairs": 0,
+    "cross_split_pairs": 0,
+    "decision_rule": "candidates are for manual review only; nothing is removed automatically",
+    "method": "64-bit DCT perceptual hash (8-bit grayscale, Lanczos resize to 32x32, orthonormal 2-D DCT-II, top-left 8x8 block vs its median); pairs compared by Hamming distance",
+    "pairs_at_or_below": {
+      "0": 1,
+      "10": 7,
+      "12": 22,
+      "2": 1,
+      "4": 1,
+      "6": 1,
+      "8": 4
+    },
+    "pairs_within_threshold": 1,
+    "threshold": 4
+  },
+  "per_class_count_range": {
+    "test": {
+      "max": 60,
+      "min": 60
+    },
+    "train": {
+      "max": 180,
+      "min": 180
+    },
+    "val": {
+      "max": 60,
+      "min": 60
+    }
+  },
+  "source": {
+    "archive": {
+      "attempts": [
+        {
+          "result": "HTML page instead of the file",
+          "url": "https://drive.usercontent.google.com/download?id=1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc&export=download"
+        }
+      ],
+      "bytes": 50733617,
+      "content_type": "application/octet-stream",
+      "downloaded_utc": "2026-11-01T14:26:30Z",
+      "extraction": {
+        "extracted_bytes": 78843692,
+        "extracted_files": 1801,
+        "kind": "rar",
+        "members": 1802,
+        "tool": "bsdtar 3.5.3 - libarchive 3.7.4 zlib/1.2.12 liblzma/5.4.3 bz2lib/1.0.8"
+      },
+      "filename": "NEU-CLS.rar",
+      "google_drive_file_id": "1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc",
+      "page": "https://faculty.neu.edu.cn/songkechen/zh_CN/zdylm/263270/list/index.htm",
+      "sha256": "a85bcc6bfa1a40e76f28079e135694aaf5f6a4ee01203f7eaacff0ebafaa96f8",
+      "url": "https://drive.usercontent.google.com/download?id=1NGlXT9sIaQpyxUoT6MLKm1Pr6x8oxOvc&export=download&confirm=t&uuid=683d58ed-6e60-4c2f-b879-5dcc969d0f48"
+    },
+    "files": null,
+    "mode": "downloaded from the authors' Google Drive link",
+    "prepared_utc": "2026-11-01T14:26:38Z"
+  },
+  "status": "PASS"
+}

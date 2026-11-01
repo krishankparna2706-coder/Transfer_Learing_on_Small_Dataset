@@ -8,11 +8,11 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0 complete: package skeleton, locked environment, `doctor`, full CLI interface (later-phase commands exit 3) |
-| Data | Flowers102 NOT_PREPARED; NEU-CLS NOT_PREPARED. No dataset verified. |
+| Implementation | P0 and P1 complete. P2 (methods) is in progress; training, evaluation, benchmark, report and demo commands exit 3 |
+| Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
 | Benchmark | NOT_RUN (`runs/ledger.jsonl` is empty) |
 | Demo | NOT_RUN |
-| Remote push | BLOCKED: the authenticated account has `push: false` on the origin repository |
+| Remote push | P0 pushed to `origin/main` (`2c1e9b7`) once write access was confirmed |
 
 ## P0: foundation (2026-11-01)
 
@@ -60,6 +60,7 @@ Each entry lists commands that were actually executed and what was observed.
 | Strict config schema and protocol file | PASS | `tests/test_p0_config.py` | unknown keys and protocol violations rejected; protocol YAML matches the code |
 | pip install route from `requirements.lock` | NOT_RUN | n/a | deferred to the P8 clean-room check |
 | Push to origin | BLOCKED | permission check above | the authenticated account lacks write access |
+| Push to origin (retried after the user granted write access) | PASS | `git push -u origin main` | `origin/main` = `2c1e9b7` |
 
 **Benchmark metrics: all NOT_RUN. No dataset has been verified.**
 
@@ -73,3 +74,64 @@ Each entry lists commands that were actually executed and what was observed.
 1. Implement `data prepare`, `data audit` and `support build` with fixture tests.
 2. Retry the official Flowers102 source.
 3. Fetch NEU-CLS from the authors' Google Drive link.
+
+## P1: data acquisition, audit, manifests, supports (2026-11-01)
+
+### What changed
+- **Data layer:**
+  - manifest and class-map schema (`data/manifest.py`);
+  - safe image decoding with perceptual hashes (`data/imageio.py`);
+  - safe archive extraction (`data/archive.py`);
+  - dataset adapters (`data/flowers.py`, `data/neu.py`);
+  - the audit (`data/audit.py`), nested supports (`data/support.py`) and the label budget
+    (`data/budget.py`);
+  - seeded streams (`seeds.py`) and atomic I/O (`io_utils.py`).
+- **CLI:** `data prepare`, `data audit` and `support build` are implemented.
+  - `data prepare` gained `--mirror internet-archive` and `--cross-check PATH` (Flowers only).
+  - `weights fetch` was added (D-019).
+- **Tests:** synthetic-fixture tests (`tests/test_p1_*.py`) and opt-in real-data checks
+  (`tests/test_real_data.py`).
+- **Docs:** `docs/DATA_CARD_flowers102.md`, `docs/DATA_CARD_neu_cls.md`, decisions D-012 to D-019,
+  and `reports/label_budget.md`.
+
+### Commands executed and observed results
+
+| Command | Observed |
+|---|---|
+| `data prepare --dataset neu_cls --allow-download` (first run) | archive downloaded; validation stopped on `Thumbs.db`. The attempt was moved aside, and the adapter now ignores and lists OS metadata (D-015) |
+| `data prepare --dataset neu_cls --allow-download` | PREPARED in 45 s: 1,800 images, 1,080/360/360, manifest sha256 `2f4740b0…`. The archive was byte-identical to the first download (sha256 `a85bcc6b…`) |
+| `data prepare --dataset flowers102 --allow-download --mirror internet-archive --cross-check flower_data` | PREPARED in 608 s: 8,189 images, 1,020/1,020/6,149. All three files matched torchvision's MD5s, and labels matched torchvision's loader. Kaggle copy: 8,189 byte-identical, 7,370/7,370 labels agree |
+| `data audit --dataset neu_cls` | PASS in 2 s. 1 exact-duplicate group (`Pa_101`=`Pa_105`, both test); 1 near-duplicate pair (the same one); 0 cross-split |
+| `data audit --dataset flowers102` | PASS in 11 s:<br>• 4 exact-duplicate groups, 2 cross-split<br>• 25 near-duplicate candidates (8 cross-split, 1 cross-class)<br>• details in the data card |
+| `support build --config configs/protocol-v1.yaml` (first run) | FAILED: a validation bug compared class keys in string order. Fixed, with a regression test |
+| `support build --config configs/protocol-v1.yaml` | 40 manifests written (2 datasets × 4 K × 5 seeds); label budget generated |
+| the same command again | 40 × "verified (unchanged)"; nothing rewritten |
+| `uv run pytest -q` | 138 passed, including 6 real-data checks |
+| `uv run ruff check .` and `ruff format --check .` | clean |
+| search for `test_metrics.json` or `predictions_test.csv` | none |
+
+### P1 evidence table
+
+| Criterion | Status | Command / check | Observed |
+|---|---|---|---|
+| Tests fail on overlap, corrupt files, unknown labels, duplicate IDs, unsafe paths, missing classes, wrong counts, changed hashes, train/val merging | PASS | `tests/test_p1_manifest.py`, `test_p1_audit.py`, `test_p1_support.py` | each case is rejected with a specific message |
+| Exactly K per class; K=1 ⊂ 3 ⊂ 5 ⊂ 10; reproducible across process restarts | PASS | `test_p1_support.py` (including a subprocess rebuild), `test_real_data.py` | identical content hashes; real supports nested and exact |
+| Every method gets the same IDs for a dataset/K/seed | PASS | one immutable file per dataset/K/seed; `load_support` verifies its hash | a different membership is refused |
+| Flowers official split: 1,020/1,020/6,149, 102 classes, 10/class train and val, label shift once | PASS | `data prepare`, manifest validation, torchvision cross-check, `test_real_data.py` | all hold; MAT labels − 1 matches torchvision for all 8,189 images |
+| NEU-CLS: 6 classes × 300, 200×200 grayscale; 180/60/60 with seed 2026 after the duplicate check | PASS | `data prepare`, `test_real_data.py` | holds; the duplicate cluster stays in one split; counts unaffected |
+| Corrupt/duplicate audit with method and threshold; near-duplicates reviewed, never auto-deleted | PASS (automated) / NOT_RUN (human review) | `data audit` | reports in `reports/data_audit/`; visual review of candidates is pending |
+| Acquisition groups kept together | NOT APPLICABLE | n/a | the sources provide no group metadata; limitation recorded |
+| Label-budget table; data cards distinguish official vs project splits | PASS | `reports/label_budget.md`, data cards | table generated from the stored files |
+| Fixtures separate from real manifests; real status only after real audits | PASS | fixtures live in temp dirs; real records show PREPARED + audit PASS | yes |
+| Original sources only; no unverified substitute | PASS | Flowers via MD5-verified archived official files; NEU from the authors' Drive link | the Kaggle copy is used only as a cross-check |
+
+**Benchmark metrics: all NOT_RUN.**
+
+### Unresolved issues after P1
+- Human visual review of the near-duplicate candidates is pending (D-016).
+- Flowers usage terms could not be re-checked online. NEU states no license (citation requested).
+- iCloud Drive syncs the project folder; the virtualenv was moved out of it (D-014).
+
+### Readiness for P2
+Both datasets are prepared, audited and have supports. P2 (transforms and the four methods) needs
+the ResNet18 IMAGENET1K_V1 weights; `weights fetch` will download them (46,830,571 bytes).

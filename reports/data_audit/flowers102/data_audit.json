@@ -1,0 +1,119 @@
+{
+  "audit_version": 1,
+  "class_map_sha256": "89aa72740be1596d831d08931cf1d684991eb8fc2f9e90f639042038e56b2cff",
+  "counts": {
+    "test": 6149,
+    "train": 1020,
+    "val": 1020
+  },
+  "dataset": "flowers102",
+  "decode_failures": [],
+  "dimensions_top": {
+    "500x500": 70,
+    "500x667": 208,
+    "500x752": 128,
+    "625x500": 75,
+    "666x500": 350,
+    "667x500": 1486,
+    "667x501": 85,
+    "750x500": 256,
+    "751x500": 71,
+    "752x500": 834
+  },
+  "distinct_dimensions": 856,
+  "exact_duplicates": {
+    "byte_identical_groups": 4,
+    "cross_class_groups": [],
+    "cross_split_groups": [
+      [
+        "flowers102/image_07307",
+        "flowers102/image_07309"
+      ],
+      [
+        "flowers102/image_08067",
+        "flowers102/image_08077"
+      ]
+    ],
+    "pixel_identical_groups": 4
+  },
+  "exclusions": [],
+  "findings": [
+    "2 exact-duplicate group(s) span splits; record a dataset decision (official splits are preserved, never rewritten)",
+    "8 near-duplicate candidate pair(s) span splits (pHash distance <= 4); manual review required",
+    "no acquisition-group metadata is available; splits are image-level"
+  ],
+  "formats": {
+    "JPEG": 8189
+  },
+  "generated_utc": "2026-11-01T14:30:58Z",
+  "groups": {
+    "consequence": "image-level splits cannot establish generalization to new acquisition groups (lines, coils, cameras)",
+    "metadata": "none available from the source"
+  },
+  "integrity_failures": [],
+  "manifest": {
+    "path": "flowers102-v1.csv",
+    "rows": 8189,
+    "sha256": "886cf59e92473be726096c16975e82804df0ebe18045274da891ad3747651283"
+  },
+  "modes": {
+    "RGB": 8189
+  },
+  "near_duplicates": {
+    "cross_class_pairs": 1,
+    "cross_split_pairs": 8,
+    "decision_rule": "candidates are for manual review only; nothing is removed automatically",
+    "method": "64-bit DCT perceptual hash (8-bit grayscale, Lanczos resize to 32x32, orthonormal 2-D DCT-II, top-left 8x8 block vs its median); pairs compared by Hamming distance",
+    "pairs_at_or_below": {
+      "0": 14,
+      "10": 117,
+      "12": 580,
+      "2": 19,
+      "4": 25,
+      "6": 30,
+      "8": 42
+    },
+    "pairs_within_threshold": 25,
+    "threshold": 4
+  },
+  "per_class_count_range": {
+    "test": {
+      "max": 238,
+      "min": 20
+    },
+    "train": {
+      "max": 10,
+      "min": 10
+    },
+    "val": {
+      "max": 10,
+      "min": 10
+    }
+  },
+  "source": {
+    "archive": null,
+    "files": {
+      "image": {
+        "bytes": 344862509,
+        "filename": "102flowers.tgz",
+        "md5": "52808999861908f626f3c1f4e79d11fa",
+        "sha256": "2d01ecc807db462958cfe3d92f57a8c252b4abd240eb955770201e45f783b246"
+      },
+      "label": {
+        "bytes": 502,
+        "filename": "imagelabels.mat",
+        "md5": "e0620be6f572b9609742df49c70aed4d",
+        "sha256": "4903e94206bac23bf772aadf06451916df56b58fc483a62db32a97b82656651d"
+      },
+      "setid": {
+        "bytes": 14989,
+        "filename": "setid.mat",
+        "md5": "a5357ecc9cb78c4bef273ce3793fc85c",
+        "sha256": "46b8678f91fd95d3c8f4feab80d271a6c834a1dd896fe29fd3e6ad9ce5c8dccd"
+      }
+    },
+    "mode": "Internet Archive captures of the official Oxford URLs, MD5-verified against torchvision's recorded checksums",
+    "prepared_utc": "2026-11-01T14:28:40Z"
+  },
+  "status": "PASS"
+}

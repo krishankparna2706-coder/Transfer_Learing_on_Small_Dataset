@@ -1,0 +1,123 @@
+{
+  "acquisition": {
+    "log": [
+      {
+        "bytes": 14989,
+        "downloaded_utc": "2026-11-01T14:18:40Z",
+        "file": "setid.mat",
+        "md5": "a5357ecc9cb78c4bef273ce3793fc85c",
+        "result": "downloaded; MD5 matches torchvision's record",
+        "sha256": "46b8678f91fd95d3c8f4feab80d271a6c834a1dd896fe29fd3e6ad9ce5c8dccd",
+        "url": "https://web.archive.org/web/20141102073126id_/http://www.robots.ox.ac.uk:80/~vgg/data/flowers/102/setid.mat"
+      },
+      {
+        "bytes": 502,
+        "downloaded_utc": "2026-11-01T14:18:42Z",
+        "file": "imagelabels.mat",
+        "md5": "e0620be6f572b9609742df49c70aed4d",
+        "result": "downloaded; MD5 matches torchvision's record",
+        "sha256": "4903e94206bac23bf772aadf06451916df56b58fc483a62db32a97b82656651d",
+        "url": "https://web.archive.org/web/20141028182747id_/http://www.robots.ox.ac.uk:80/~vgg/data/flowers/102/imagelabels.mat"
+      },
+      {
+        "bytes": 344862509,
+        "downloaded_utc": "2026-11-01T14:28:34Z",
+        "file": "102flowers.tgz",
+        "md5": "52808999861908f626f3c1f4e79d11fa",
+        "result": "downloaded; MD5 matches torchvision's record",
+        "sha256": "2d01ecc807db462958cfe3d92f57a8c252b4abd240eb955770201e45f783b246",
+        "url": "https://web.archive.org/web/20201122103345id_/http://www.robots.ox.ac.uk/~vgg/data/flowers/102/102flowers.tgz"
+      }
+    ],
+    "mirror": "internet-archive",
+    "snapshots": {
+      "image": "https://web.archive.org/web/20201122103345id_/http://www.robots.ox.ac.uk/~vgg/data/flowers/102/102flowers.tgz",
+      "label": "https://web.archive.org/web/20141028182747id_/http://www.robots.ox.ac.uk:80/~vgg/data/flowers/102/imagelabels.mat",
+      "setid": "https://web.archive.org/web/20141102073126id_/http://www.robots.ox.ac.uk:80/~vgg/data/flowers/102/setid.mat"
+    }
+  },
+  "attempted_utc": "2026-11-01T14:36:09Z",
+  "class_map": {
+    "path": "flowers102.class_map.json",
+    "sha256": "89aa72740be1596d831d08931cf1d684991eb8fc2f9e90f639042038e56b2cff"
+  },
+  "cross_check": {
+    "byte_different_from_official": 0,
+    "byte_identical_to_official": 8189,
+    "duplicate_names_in_copy": 0,
+    "examples": {
+      "different": [],
+      "foreign": [],
+      "label_disagreements": []
+    },
+    "folder_labels_agree": 7370,
+    "folder_labels_disagree": 0,
+    "image_files": 8189,
+    "layout_file_counts": {
+      "test": 819,
+      "train": 6552,
+      "valid": 818
+    },
+    "not_in_official_set": 0,
+    "official_images_missing_from_copy": 0,
+    "path": "flower_data",
+    "unlabeled_files": 819,
+    "use": "verification only; the manifest and split come from the official files"
+  },
+  "dataset": "flowers102",
+  "files": {
+    "image": {
+      "bytes": 344862509,
+      "filename": "102flowers.tgz",
+      "md5": "52808999861908f626f3c1f4e79d11fa",
+      "sha256": "2d01ecc807db462958cfe3d92f57a8c252b4abd240eb955770201e45f783b246"
+    },
+    "label": {
+      "bytes": 502,
+      "filename": "imagelabels.mat",
+      "md5": "e0620be6f572b9609742df49c70aed4d",
+      "sha256": "4903e94206bac23bf772aadf06451916df56b58fc483a62db32a97b82656651d"
+    },
+    "setid": {
+      "bytes": 14989,
+      "filename": "setid.mat",
+      "md5": "a5357ecc9cb78c4bef273ce3793fc85c",
+      "sha256": "46b8678f91fd95d3c8f4feab80d271a6c834a1dd896fe29fd3e6ad9ce5c8dccd"
+    }
+  },
+  "label_conversion": "imagelabels.mat labels 1..102 minus 1, applied once; cross-checked against torchvision Flowers102 (zero-based) for every split",
+  "manifest": {
+    "counts": {
+      "test": 6149,
+      "train": 1020,
+      "val": 1020
+    },
+    "path": "flowers102-v1.csv",
+    "rows": 8189,
+    "sha256": "886cf59e92473be726096c16975e82804df0ebe18045274da891ad3747651283"
+  },
+  "prepared_utc": "2026-11-01T14:36:12Z",
+  "source": {
+    "download_url_prefix": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/",
+    "expected_files": {
+      "image": {
+        "filename": "102flowers.tgz",
+        "md5": "52808999861908f626f3c1f4e79d11fa"
+      },
+      "label": {
+        "filename": "imagelabels.mat",
+        "md5": "e0620be6f572b9609742df49c70aed4d"
+      },
+      "setid": {
+        "filename": "setid.mat",
+        "md5": "a5357ecc9cb78c4bef273ce3793fc85c"
+      }
+    },
+    "loader": "torchvision.datasets.Flowers102 (torchvision 0.29.2)",
+    "mode": "already present",
+    "official_page": "https://www.robots.ox.ac.uk/~vgg/data/flowers/102/"
+  },
+  "status": "PREPARED",
+  "summary": "8189 images; train/val/test = 1020/1020/6149",
+  "terms": "Usage terms not verified: the official page was unreachable from this network on 2026-11-01. FewShotLab never redistributes the images; check the official page before any redistribution."
+}

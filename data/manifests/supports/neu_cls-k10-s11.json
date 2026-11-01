@@ -1,0 +1,99 @@
+{
+  "class_map_sha256": "2788b023a33f8359db75c7154dd335c3e21adc9fd2eac9f33a8dac163241fceb",
+  "content_sha256": "5736d7c4c1ecbecdd034ef09e3fc5889e21fd8bd71d5cc8456447b7bb5612688",
+  "created_utc": "2026-11-01T14:31:53Z",
+  "dataset": "neu_cls",
+  "k": 10,
+  "n_images": 60,
+  "numpy_version": "2.4.6",
+  "protocol_id": "fewshotlab-v1",
+  "rng": {
+    "bit_generator": "numpy.random.PCG64",
+    "derivation": "uint64 = first 8 bytes (big-endian) of SHA-256 over the canonical JSON label list",
+    "ordering": "image_id ascending within each class, then permuted",
+    "seed_labels": [
+      "neu_cls",
+      "support",
+      11,
+      "<class_id>"
+    ]
+  },
+  "schema_version": 1,
+  "seed": 11,
+  "selected": {
+    "0": [
+      "neu_cls/RS_139",
+      "neu_cls/RS_71",
+      "neu_cls/RS_149",
+      "neu_cls/RS_19",
+      "neu_cls/RS_63",
+      "neu_cls/RS_55",
+      "neu_cls/RS_88",
+      "neu_cls/RS_89",
+      "neu_cls/RS_233",
+      "neu_cls/RS_259"
+    ],
+    "1": [
+      "neu_cls/Pa_62",
+      "neu_cls/Pa_188",
+      "neu_cls/Pa_71",
+      "neu_cls/Pa_61",
+      "neu_cls/Pa_146",
+      "neu_cls/Pa_78",
+      "neu_cls/Pa_92",
+      "neu_cls/Pa_256",
+      "neu_cls/Pa_198",
+      "neu_cls/Pa_258"
+    ],
+    "2": [
+      "neu_cls/Cr_121",
+      "neu_cls/Cr_131",
+      "neu_cls/Cr_161",
+      "neu_cls/Cr_214",
+      "neu_cls/Cr_296",
+      "neu_cls/Cr_7",
+      "neu_cls/Cr_254",
+      "neu_cls/Cr_294",
+      "neu_cls/Cr_263",
+      "neu_cls/Cr_189"
+    ],
+    "3": [
+      "neu_cls/PS_286",
+      "neu_cls/PS_22",
+      "neu_cls/PS_83",
+      "neu_cls/PS_229",
+      "neu_cls/PS_175",
+      "neu_cls/PS_57",
+      "neu_cls/PS_92",
+      "neu_cls/PS_239",
+      "neu_cls/PS_167",
+      "neu_cls/PS_200"
+    ],
+    "4": [
+      "neu_cls/In_50",
+      "neu_cls/In_206",
+      "neu_cls/In_40",
+      "neu_cls/In_32",
+      "neu_cls/In_93",
+      "neu_cls/In_263",
+      "neu_cls/In_267",
+      "neu_cls/In_151",
+      "neu_cls/In_52",
+      "neu_cls/In_72"
+    ],
+    "5": [
+      "neu_cls/Sc_203",
+      "neu_cls/Sc_218",
+      "neu_cls/Sc_23",
+      "neu_cls/Sc_136",
+      "neu_cls/Sc_191",
+      "neu_cls/Sc_61",
+      "neu_cls/Sc_126",
+      "neu_cls/Sc_9",
+      "neu_cls/Sc_90",
+      "neu_cls/Sc_124"
+    ]
+  },
+  "split_manifest": "neu_cls-v1.csv",
+  "split_manifest_sha256": "2f4740b0b0167ed3ef95421b53da671724755ed918ed09f53912c51b4aa477ca"
+}
