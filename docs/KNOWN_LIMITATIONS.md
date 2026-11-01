@@ -26,6 +26,12 @@ This list states what FewShotLab cannot claim. It is updated as phases add evide
 - Results are not bitwise reproducible across platforms, devices or library versions. Each claim
   will state its scope: the same device and environment, within a declared tolerance.
 - Only an Apple M4 Pro (MPS and CPU) has been used so far. CUDA paths are untested.
+- On MPS, deterministic algorithms are requested in warn-only mode (D-029). Inference and checkpoint
+  reload reproduced predictions exactly in five diagnostic runs. Whether repeated training runs
+  match on MPS has not been measured yet; on CPU they match within the declared tolerance.
+- The compute estimate (`reports/compute_estimate.md`) assumes linear scaling with image counts and
+  extrapolates NEU scratch and frozen costs from Flowers ratios. It is an estimate, not a
+  measurement.
 - The test gate is a process control with an audit trail, not cryptographic isolation from the
   repository owner.
 

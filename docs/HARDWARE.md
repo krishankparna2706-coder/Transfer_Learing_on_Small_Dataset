@@ -13,13 +13,50 @@
 
 No NVIDIA GPU is present, so the CUDA code paths are untested on this machine.
 
+## Measured timing (diagnostic runs, 2026-11-01, device `mps`)
+
+These are five `diagnostic` runs (2 epochs each, K=10, seed 11, `num_workers` 0), recorded in
+`runs/ledger.jsonl`. **Their validation numbers are not results.**
+
+| Diagnostic run | Fit, epoch 1 / 2 | Validation pass | Wall time | MPS driver memory |
+|---|---:|---:|---:|---:|
+| Flowers scratch (1,020 support, 1,020 validation images) | 10.46 s / 5.80 s | 2.74 s | 29.6 s | 2.25 GB |
+| Flowers frozen | 2.87 s / 2.72 s | 2.68 s | 18.5 s | 1.17 GB |
+| Flowers partial | 3.47 s / 3.30 s | 2.70 s | 19.6 s | 1.17 GB |
+| Flowers prototypes (embedding 1,020 support images) | 2.78 s | 2.70 s | 12.4 s | 1.16 GB |
+| NEU partial (60 support, 360 validation images) | 0.47 s / 0.38 s | 0.76 s | 8.1 s | 1.34 GB |
+
+- Reloading the selected checkpoint reproduced the validation predictions exactly in all five
+  runs (maximum score difference 0.0).
+- **Interpretation (unverified):** a frozen-encoder epoch costs about as much as a validation pass.
+  This suggests image decoding and resizing on the main process (`num_workers` 0) dominate, not the
+  network. Raising the DataLoader worker count (an execution detail, D-032) may shorten wall time.
+  That is not yet measured.
+
+## Compute estimate (ESTIMATE, not an observed runtime)
+
+Generated reproducibly by `fewshotlab.reporting.estimate` from the diagnostic timings above. See
+`reports/compute_estimate.md`, which includes every input run ID and every assumption.
+
+| Scope | Lower bound (early stop at 16 epochs) | Upper bound (100 epochs) |
+|---|---:|---:|
+| MVP: 8 Flowers jobs (K ∈ {1, 10}, 4 methods, seed 11) | 0.14 h | 0.82 h |
+| Full matrix: 156 unique runs, training | 1.56 h | 9.33 h |
+| Full matrix: test evaluation of every unique run (P5) | about 0.36 h | |
+
+**Assumptions:**
+- costs scale linearly with image counts;
+- NEU scratch and frozen costs are scaled from the Flowers method ratios.
+
+**Not included:** data preparation, reports, failures and the corruption study.
+
+**Caveat:** small NEU epochs carry fixed per-batch overhead (NEU partial fit costs 6.3 ms per image,
+against 3.2 ms for Flowers).
+
 ## Compute estimate method
 
-**Status: NOT_RUN.** No job has been timed yet, and no training duration is promised before one
-is measured.
-
 1. **Time a representative job.** Run one timed diagnostic job per method and dataset on the
-   actual device. This is the closing step of P3, or a P4 pilot. Record:
+   actual device. Record:
    - seconds per training epoch;
    - seconds per validation pass;
    - peak memory, where the backend reports it.

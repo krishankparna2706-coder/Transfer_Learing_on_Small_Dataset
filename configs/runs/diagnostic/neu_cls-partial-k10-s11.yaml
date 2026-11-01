@@ -1,0 +1,11 @@
+# DIAGNOSTIC run (ledger category "diagnostic"): 2 epochs on real NEU-CLS data to measure time
+# per epoch on this machine. Not an MVP or benchmark run; its validation numbers are not results.
+dataset: neu_cls
+method: partial
+shots: 10
+support_seed: 11
+split_manifest: data/manifests/neu_cls-v1.csv
+support_manifest: data/manifests/supports/neu_cls-k10-s11.json
+category: diagnostic
+train: {max_epochs: 2}
+device: auto

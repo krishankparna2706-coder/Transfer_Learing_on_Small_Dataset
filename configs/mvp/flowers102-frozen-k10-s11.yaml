@@ -1,0 +1,10 @@
+# P4 MVP job (exploratory, validation only): Flowers102, method frozen, K=10, seed 11, full v1 recipe.
+# Prepared in P3; NOT RUN until the P4 go-ahead.
+dataset: flowers102
+method: frozen
+shots: 10
+support_seed: 11
+split_manifest: data/manifests/flowers102-v1.csv
+support_manifest: data/manifests/supports/flowers102-k10-s11.json
+category: mvp
+device: auto

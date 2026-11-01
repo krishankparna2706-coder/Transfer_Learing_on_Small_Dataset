@@ -8,9 +8,9 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0, P1 and P2 complete (data tooling, transforms, the four methods, model persistence). P3 (training engine) is next; train, evaluate, benchmark, report and demo exit 3 |
+| Implementation | P0–P3 complete: data tooling, four methods, training engine, evidence capture, test gate (refusing). Benchmark, report, lock-test and demo commands exit 3 (P4–P6) |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
-| Benchmark | NOT_RUN (`runs/ledger.jsonl` is empty) |
+| Benchmark | NOT_RUN. The ledger holds only 5 `diagnostic` runs (2 epochs each, timing only); 0 MVP and 0 core runs |
 | Demo | NOT_RUN |
 | Remote push | P0 pushed to `origin/main` (`2c1e9b7`) once write access was confirmed |
 
@@ -178,3 +178,80 @@ the ResNet18 IMAGENET1K_V1 weights; `weights fetch` will download them (46,830,5
 - Tensor resizing differs slightly from PIL resizing (D-020).
 
 **Benchmark metrics: all NOT_RUN.**
+
+## P3: training engine and evidence capture (2026-11-01)
+
+### What changed
+- **Training** (`engine/trainer.py`):
+  - accepts only `SupportSet`/`ValidationSet`, which refuse any other split;
+  - AdamW parameter groups, cross-entropy, float32;
+  - selection by float64 macro-F1, with ties to lower validation loss and then the earlier epoch;
+  - a separate patience reference (≥ 0.001, patience 15);
+  - non-finite loss means FAILED;
+  - the reloaded best checkpoint must reproduce its predictions.
+- **Batching** (`engine/batching.py`): min(32, N), with the singleton tail merged and nothing
+  dropped.
+- **Runs** (`engine/runner.py`):
+  - verifies the input hashes, uses immutable run IDs with numbered attempts, and writes atomic
+    artifacts;
+  - computes metrics from the written predictions file;
+  - resume continues as a new attempt; finished runs are immutable;
+  - `evaluate --split val` writes verification records.
+- **Records:** `engine/ledger.py` (append-only), `engine/artifacts.py`, `engine/environment.py`
+  (determinism settings) and `engine/provenance.py` (git state, source hash, deterministic source
+  snapshot).
+- **Test gate** (`engine/gate.py`): test evaluation is refused (exit 5) until P5 seals a plan.
+- **Metrics and reporting:**
+  - `metrics/core.py`: the protocol definitions;
+  - `reporting/aggregate.py`: accepts only COMPLETED, non-fixture runs whose evidence regenerates;
+  - `reporting/plots.py` and `reporting/estimate.py`.
+- **CLI:** `train [--resume]` and `evaluate` are implemented.
+- **Configs:** 5 diagnostic configs, and the 8 MVP configs (**not run**).
+
+### Commands executed and observed results
+
+| Command | Observed |
+|---|---|
+| `uv run pytest -q` | 230 passed, including P3 fixture training runs on CPU |
+| `python -m fewshotlab evaluate --run x --split test` | exit 5: "test evaluation is locked … no file was written" |
+| `python -m fewshotlab train --config configs/runs/diagnostic/<5 configs>` on MPS | all 5 COMPLETED. Wall times: 29.6, 18.5, 19.6, 12.4 and 8.1 s. Reload check identical (max score difference 0.0). Details in `docs/HARDWARE.md` |
+| `fewshotlab.reporting.estimate.write_estimate` | ESTIMATE written to `reports/compute_estimate.md`:<br>• MVP: 0.14–0.82 h<br>• full matrix: 1.56–9.33 h<br>• test evaluation: about 0.36 h |
+
+The diagnostics ran from the then-uncommitted P3 working tree. Each run saved a
+`source_snapshot.tar.gz` with its hash, and its provenance records `dirty: true`. **Their
+validation numbers are 2-epoch diagnostics, not results.**
+
+### Artifacts of one real run
+
+Example: `runs/diagnostic__fewshotlab-v1__flowers102__partial__k10__s11__cfg506dc445/a001/`.
+- **Inputs and environment:** `config.resolved.yaml`, `environment.json`, `provenance.json`,
+  `source_snapshot.tar.gz`.
+- **Model:** `model_spec.json` and `best.ckpt` (45 MB).
+- **Results:** `train_history.csv`, `predictions_val.csv` (1,020 rows with full score vectors),
+  `val_metrics.json`, and `plots/learning_curves.png` and `plots/confusion_val.png`.
+- **Status:** `status.json`, with history RUNNING → COMPLETED.
+
+### P3 evidence table
+
+| Criterion | Status | Test / command | Observed |
+|---|---|---|---|
+| A tiny labeled fixture learns; its metrics carry `is_fixture=true` and aggregation rejects them | PASS | `test_p3_engine.py` (fixture runs, `test_scratch_training_loss_decreases`, `test_fixture_results_are_rejected_by_aggregation`) | all 4 methods COMPLETED above chance on a 3-class fixture; training loss decreases; every fixture record is rejected with reason "software fixture" |
+| Synthetic metric example matches hand calculations, including a never-predicted class and zero denominators | PASS | `test_p3_metrics.py` | top-1 0.75, macro-F1 11/15, confusion [[1,1],[0,2]]; zero convention holds; matches scikit-learn |
+| Checkpoint reload preserves results; interrupted runs stay RUNNING/FAILED and never enter the completed table | PASS | reload check in every run; `test_interruption_fails_the_attempt_and_resume_continues_exactly` | interrupted attempt FAILED with no metrics file; rejected by aggregation; resume reproduces the uninterrupted run exactly |
+| Test evaluation fails before a sealed plan; no test-data dependency in training | PASS | `test_validation_reevaluation_and_test_refusal`, `test_training_never_reads_test_rows`, `test_fit_interfaces_accept_only_support_and_validation`, CLI exit 5 | refused, nothing written; training read only `train`/`val` rows |
+| Two same-device deterministic repetitions meet the declared tolerance | PASS (CPU) / NOT_RUN (MPS training) | `test_two_repetitions_on_the_same_device_match` | CPU: identical predictions and metrics; tolerance 1e-6 declared. Repeated MPS training is not yet measured |
+| Batches: NEU K=1 (6 images) and a would-be singleton tail | PASS | `test_p3_batching.py` | 6 → one batch; 33 → one batch of 33; nothing dropped for N in {2, 6, 33, 65, 102, 306, 510, 1020} |
+| Non-finite loss stops the run and records the cause | PASS | `test_non_finite_loss_marks_the_run_failed` | FAILED with `NonFiniteError`; no metrics written |
+| Short real-data diagnostic, separate from planned jobs | PASS | 5 `diagnostic` runs | timing recorded; estimate generated |
+
+**Benchmark metrics: all NOT_RUN** (no MVP or core run exists).
+
+### Remaining risks
+- Repeated training on MPS has not been tested for repeatability (warn-only determinism).
+- `num_workers` 0 is probably data-bound. The worker count is an execution detail and can be raised
+  for P4 if measured to help.
+- The near-duplicate visual review (P1) is still pending.
+
+### Next action (P4, awaiting go-ahead)
+Run the 8 MVP jobs listed in `configs/mvp/`, one `train` command per config. Validation only;
+the test split stays locked.

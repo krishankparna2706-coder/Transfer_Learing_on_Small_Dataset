@@ -12,7 +12,7 @@ DOCUMENTED_FLAGS = {
     ("data", "prepare"): ["--dataset", "--source", "--allow-download", "--mirror", "--cross-check"],
     ("data", "audit"): ["--dataset", "--near-dup-threshold"],
     ("support", "build"): ["--config", "--dataset"],
-    ("train",): ["--config", "--device", "--allow-download"],
+    ("train",): ["--config", "--device", "--allow-download", "--resume"],
     ("evaluate",): ["--run", "--split", "--device"],
     ("benchmark",): ["--config", "--dry-run"],
     ("lock-test",): ["--plan"],
@@ -22,9 +22,6 @@ DOCUMENTED_FLAGS = {
 
 # Commands that are still stubs in this phase, with the phase that implements them.
 STUBS = {
-    "train": (["train", "--config", "configs/not-used.yaml"], "P3"),
-    "evaluate val": (["evaluate", "--run", "some-run", "--split", "val"], "P3"),
-    "evaluate test": (["evaluate", "--run", "some-run", "--split", "test"], "P3"),
     "benchmark": (["benchmark", "--config", "configs/not-used.yaml"], "P4"),
     "lock-test": (["lock-test", "--plan", "configs/not-used.yaml"], "P5"),
     "report": (["report"], "P4"),

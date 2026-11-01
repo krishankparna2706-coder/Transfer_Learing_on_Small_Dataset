@@ -80,8 +80,8 @@ All commands run as `python -m fewshotlab <command>`.
 | `data audit --dataset {flowers102,neu_cls} [--near-dup-threshold BITS]` | P1 | implemented |
 | `support build --config PATH [--dataset ...]` | P1 | implemented |
 | `weights fetch` | P2 | implemented (explicit download of ResNet18 IMAGENET1K_V1) |
-| `train --config PATH [--device ...] [--allow-download]` | P3 | not implemented yet |
-| `evaluate --run RUN_ID --split {val,test} [--device ...]` | P3 / P5 | not implemented yet |
+| `train --config PATH [--device ...] [--allow-download] [--resume]` | P3 | implemented (support + validation only) |
+| `evaluate --run RUN_ID --split {val,test} [--device ...]` | P3 / P5 | `val` re-check implemented; `test` refused until the P5 seal (exit 5) |
 | `benchmark --config PATH [--dry-run]` | P4 / P5 | not implemented yet |
 | `lock-test --plan PATH` | P5 | not implemented yet |
 | `report [--ledger PATH] [--out DIR]` | P4 | not implemented yet |

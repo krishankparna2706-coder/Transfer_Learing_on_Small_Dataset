@@ -1,0 +1,87 @@
+{
+  "assumptions": [
+    "per-image costs come from the last (steady-state) epoch of each diagnostic run",
+    "learned runs take between 16 (earliest early stop) and 100 epochs",
+    "fit cost scales linearly with support images; validation cost with validation images",
+    "neu_cls scratch fit cost = neu_cls partial cost x Flowers scratch/partial ratio (1.76)",
+    "neu_cls frozen fit cost = neu_cls partial cost x Flowers frozen/partial ratio (0.83)"
+  ],
+  "excluded": [
+    "data preparation",
+    "report generation",
+    "failure contingency",
+    "corruption study (P5)"
+  ],
+  "full_matrix_test_evaluation_hours": 0.36,
+  "full_matrix_training_hours": {
+    "lower_16_epochs": 1.56,
+    "upper_100_epochs": 9.33
+  },
+  "full_matrix_unique_runs": 156,
+  "generated_utc": "2026-11-01T14:55:57Z",
+  "inputs": {
+    "flowers102/frozen": {
+      "attempt_id": "a001",
+      "device": "mps",
+      "first_epoch_fit_s": 2.8661540830507874,
+      "fit_s_per_image": 0.0026684620098083043,
+      "run_id": "diagnostic__fewshotlab-v1__flowers102__frozen__k10__s11__cfg09aef7c2",
+      "steady_epoch_fit_s": 2.7218312500044703,
+      "steady_epoch_val_s": 2.6785930832847953,
+      "support_images": 1020,
+      "val_images": 1020,
+      "val_s_per_image": 0.002626071650279211
+    },
+    "flowers102/partial": {
+      "attempt_id": "a001",
+      "device": "mps",
+      "first_epoch_fit_s": 3.473461833782494,
+      "fit_s_per_image": 0.003230537867684867,
+      "run_id": "diagnostic__fewshotlab-v1__flowers102__partial__k10__s11__cfg506dc445",
+      "steady_epoch_fit_s": 3.295148625038564,
+      "steady_epoch_val_s": 2.696680292021483,
+      "support_images": 1020,
+      "val_images": 1020,
+      "val_s_per_image": 0.0026438042078641994
+    },
+    "flowers102/prototypes": {
+      "attempt_id": "a001",
+      "device": "mps",
+      "embed_s_per_image": 0.0027218975076524943,
+      "run_id": "diagnostic__fewshotlab-v1__flowers102__prototypes__k10__s11__cfg40f6fea9",
+      "support_images": 1020,
+      "val_images": 1020,
+      "val_s_per_image": 0.002645829494348636
+    },
+    "flowers102/scratch": {
+      "attempt_id": "a001",
+      "device": "mps",
+      "first_epoch_fit_s": 10.457379250321537,
+      "fit_s_per_image": 0.005687397549056686,
+      "run_id": "diagnostic__fewshotlab-v1__flowers102__scratch__k10__s11__cfg06c045da",
+      "steady_epoch_fit_s": 5.801145500037819,
+      "steady_epoch_val_s": 2.741982957813889,
+      "support_images": 1020,
+      "val_images": 1020,
+      "val_s_per_image": 0.0026882185860920478
+    },
+    "neu_cls/partial": {
+      "attempt_id": "a001",
+      "device": "mps",
+      "first_epoch_fit_s": 0.4740772917866707,
+      "fit_s_per_image": 0.006331326401171585,
+      "run_id": "diagnostic__fewshotlab-v1__neu_cls__partial__k10__s11__cfgbc1dc080",
+      "steady_epoch_fit_s": 0.3798795840702951,
+      "steady_epoch_val_s": 0.758687584195286,
+      "support_images": 60,
+      "val_images": 360,
+      "val_s_per_image": 0.002107465511653572
+    }
+  },
+  "kind": "ESTIMATE (not an observed runtime)",
+  "missing_inputs": [],
+  "mvp_8_jobs_hours": {
+    "lower_16_epochs": 0.14,
+    "upper_100_epochs": 0.82
+  }
+}

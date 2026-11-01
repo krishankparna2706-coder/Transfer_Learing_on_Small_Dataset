@@ -199,3 +199,81 @@ Each entry records what was decided, why, and what it implies. Newest entries go
   `|q|² - 2qp + |p|²` expansion. This avoids cancellation error, and ties go to the lowest class ID.
 - **Cache keys:** embedding caches are keyed by encoder SHA-256, transform ID, manifest SHA-256,
   class-map SHA-256 and the ordered image-ID list. Any difference is a cache miss.
+
+## D-026 (2026-11-01): The initialization stream depends only on train_seed
+- **Decision:** `init_seed = SHA-256("init", train_seed)`, applied inside an isolated
+  `torch.random.fork_rng`.
+- **Consequence:** at a given seed every method starts from the same new-head initialization, and
+  scratch from the same random encoder. Methods are therefore paired on support IDs, augmentation
+  draws, loader order and head initialization.
+- **Other streams:** augmentation uses (`augment`, train_seed, epoch, image_id) and loader order
+  uses (`loader`, train_seed, epoch).
+
+## D-027 (2026-11-01): How checkpoint selection and patience are implemented
+- **Selection:** macro-F1 is compared in float64. A new best requires a higher macro-F1, or an equal
+  one with strictly lower validation cross-entropy (sample-weighted, float64). Otherwise the
+  earlier epoch is kept.
+- **Patience:** the reference starts at −∞, so epoch 1 always sets it. It resets only when
+  macro-F1 is at least reference + 0.001. Training stops once 15 consecutive epochs pass without
+  such a reset, so the earliest possible stop is after epoch 16.
+- **Checkpoints:** `best.ckpt` is written at every new best; the resumable `last.ckpt` after every
+  epoch.
+
+## D-028 (2026-11-01): Evidence integrity rules
+- **Predictions first:** metrics in `val_metrics.json` are computed from the written
+  `predictions_val.csv`, after re-reading it and checking that every validation image appears
+  exactly once.
+- **Reload check:** the selected `best.ckpt`, or the saved prototypes, is reloaded into a fresh
+  model and must reproduce the validation predictions; otherwise the run FAILS.
+- **Aggregation:** a run is accepted only if it is COMPLETED, not a fixture, on the right protocol
+  and category, and its stored metrics regenerate exactly from its predictions file (with a
+  matching hash).
+
+## D-029 (2026-11-01): Determinism settings
+- **CPU:** strict `torch.use_deterministic_algorithms(True)`.
+- **MPS and CUDA:** the same call with `warn_only=True`, because some kernels have no deterministic
+  implementation. This is recorded in `environment.json`.
+- **Claim scope:** two CPU repetitions of a fixture run give equal predictions, and scores equal
+  within the declared tolerance of 1e-6. No bitwise claim is made across devices or platforms.
+
+## D-030 (2026-11-01): Resume semantics
+- **Resume is a new attempt.** `train --resume` continues an interrupted (FAILED or RUNNING) attempt
+  as a new attempt that records `resumed_from`. It restores the model, the optimizer state, the
+  epoch, the selection and patience state, and the history. It also copies the earlier best
+  checkpoint, verified by hash.
+- **Exactness:** the random streams are pure functions of (seed, epoch, image), so a resumed CPU
+  fixture run reproduces an uninterrupted run exactly (tested).
+- **Immutability:** interrupted attempts stay FAILED, and a COMPLETED run can never be re-run
+  in place.
+
+## D-031 (2026-11-01): Run identity and the ledger
+- **Run ID:** `protocol__dataset__method__kK__sSEED__cfg<config sha256[:8]>`. Non-core categories
+  are prefixed, for example `diagnostic__…` or `mvp__…`.
+- **Attempts:** each run has numbered attempts `a001`, `a002`, …
+- **Ledger:** `runs/ledger.jsonl` is append-only, with `status` events (RUNNING, then COMPLETED or
+  FAILED) and `verification` events.
+
+## D-032 (2026-11-01): Execution details outside the recipe
+- **Decision:** the evaluation batch size (64) and the DataLoader worker count are execution
+  details. Results do not depend on them, by design (per-sample augmentation streams), and they
+  are recorded with each run.
+
+## D-033 (2026-11-01): The test gate before P5
+- **Decision:** `evaluate --split test` is always refused (exit 5) and computes or writes nothing,
+  until P5 implements `lock-test` sealing.
+- **Validation re-check:** `evaluate --split val` writes a verification record linked to the
+  original attempt. It is not a new result.
+
+## D-034 (2026-11-01): Held-out IDs are read only for disjointness checks
+- **Decision:** verifying a support set reads the validation and test **IDs** to prove no
+  held-out image is in it. No held-out image, label or pixel enters fitting or selection.
+- **Proof:** the training path itself reads only the `train` and `val` rows, which a test proves
+  with a spy.
+
+## D-035 (2026-11-01): The resume state is deleted when a run completes
+- **Context:** `last.ckpt` (model plus AdamW state, about 113 MB for ResNet18) is only needed to
+  resume an unfinished run.
+- **Decision:** a COMPLETED run deletes its own `last.ckpt` and records that in provenance. It keeps
+  `best.ckpt`, the inference artifact. FAILED attempts keep theirs, so they can still be resumed.
+- **Exception:** the five P3 diagnostic runs ran before this rule existed and still hold their
+  local `last.ckpt` files. Those are gitignored.

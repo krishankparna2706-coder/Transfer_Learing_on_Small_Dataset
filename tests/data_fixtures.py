@@ -155,3 +155,86 @@ def make_flowers_files(base: Path, *, classes: int = 3, per_split=(2, 2, 3)) -> 
         "label": ("imagelabels.mat", md5(base / "imagelabels.mat")),
         "setid": ("setid.mat", md5(base / "setid.mat")),
     }
+
+
+def make_color_dataset(
+    data_root: Path,
+    *,
+    dataset: str = "fixture-color",
+    per_split: dict[str, int] | None = None,
+    size: tuple[int, int] = (48, 48),
+) -> tuple[list[ImageRecord], ClassMap]:
+    """A learnable fixture: noisy red / green / blue images (software test data only)."""
+    per_split = per_split or {"train": 4, "val": 4, "test": 2}
+    colors = ((200, 40, 40), (40, 200, 40), (40, 40, 200))
+    cmap = ClassMap(dataset, ("red", "green", "blue"))
+    rng = np.random.default_rng(7)
+    records: list[ImageRecord] = []
+    for split, count in per_split.items():
+        for class_id, color in enumerate(colors):
+            for i in range(count):
+                noise = rng.normal(0, 20, size=(size[1], size[0], 3))
+                pixels = np.clip(np.array(color)[None, None, :] + noise, 0, 255).astype(np.uint8)
+                relative = f"{dataset}/{split}/c{class_id}_{i:02d}.png"
+                path = Path(data_root) / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                Image.fromarray(pixels).save(path)
+                records.append(
+                    ImageRecord(
+                        f"{dataset}/{split}_c{class_id}_{i:02d}",
+                        relative,
+                        class_id,
+                        cmap.names[class_id],
+                        split,
+                        sha256_file(path),
+                    )
+                )
+    return records, cmap
+
+
+def training_fixture(
+    data_root: Path, *, dataset: str = "fixture-color", k: int = 4, seed: int = 11
+):
+    """Prepared, audited fixture dataset with one support manifest; returns ProjectPaths."""
+    from fewshotlab.data.audit import run_audit
+    from fewshotlab.data.support import build_supports
+
+    records, cmap = make_color_dataset(data_root, dataset=dataset)
+    paths = install_dataset(records, cmap, dataset=dataset)
+    run_audit(dataset, paths=paths)
+    build_supports(paths, dataset, shots=(k,), seeds=(seed,))
+    return paths
+
+
+def fixture_config(
+    paths,
+    method: str,
+    *,
+    dataset: str = "fixture-color",
+    k: int = 4,
+    seed: int = 11,
+    max_epochs: int = 8,
+    patience: int = 15,
+):
+    from fewshotlab.config import parse_run_config
+    from fewshotlab.data.support import support_path
+
+    return parse_run_config(
+        {
+            "dataset": dataset,
+            "method": method,
+            "shots": k,
+            "support_seed": seed,
+            "split_manifest": str(manifest_path(paths, dataset)),
+            "support_manifest": str(support_path(paths, dataset, k, seed)),
+            "category": "fixture",
+            "is_fixture": True,
+            "device": "cpu",
+            "train": {
+                "max_epochs": max_epochs,
+                "patience": patience,
+                "batch_size_cap": 32,
+                "num_workers": 0,
+            },
+        }
+    )

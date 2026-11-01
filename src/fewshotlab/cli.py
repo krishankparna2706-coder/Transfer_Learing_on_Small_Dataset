@@ -113,6 +113,47 @@ def _run_support_build(args: argparse.Namespace) -> int:
     return ExitCode.OK
 
 
+def _run_train(args: argparse.Namespace) -> int:
+    from fewshotlab.config import load_run_config
+    from fewshotlab.engine.runner import run_training
+
+    cfg = load_run_config(args.config)
+    result = run_training(
+        cfg,
+        device_override=args.device,
+        allow_download=args.allow_download,
+        resume=args.resume,
+        command=["python", "-m", "fewshotlab", *sys.argv[1:]],
+    )
+    metrics = result.metrics
+    print(f"{result.run_id} / {result.attempt_id}: {result.status}")
+    print(
+        f"  VALIDATION-ONLY development result ({cfg.category}"
+        f"{', software fixture' if cfg.is_fixture else ''}); not a test benchmark"
+    )
+    print(f"  selected epoch: {result.selected_epoch}  stop: {result.stop_reason}")
+    print(
+        f"  val macro-F1 {metrics['macro_f1']:.4f}  top-1 {metrics['top1']:.4f}  "
+        f"balanced accuracy {metrics['balanced_accuracy']:.4f}  (n={metrics['n_images']})"
+    )
+    print(f"  evidence: {result.attempt_dir}")
+    return ExitCode.OK
+
+
+def _run_evaluate(args: argparse.Namespace) -> int:
+    from fewshotlab.engine.runner import evaluate_run
+
+    verification = evaluate_run(args.run, args.split, device_override=args.device)
+    print(
+        f"{verification['run_id']} / {verification['attempt_id']} validation re-evaluation: "
+        f"identical predictions {verification['identical_predictions']}, max |score diff| "
+        f"{verification['max_abs_score_difference']:.3g}, macro-F1 stored "
+        f"{verification['stored_macro_f1']:.6f} / recomputed "
+        f"{verification['recomputed_macro_f1']:.6f}"
+    )
+    return ExitCode.OK if verification["identical_predictions"] else ExitCode.FAILURE
+
+
 def _run_weights_fetch(args: argparse.Namespace) -> int:
     from fewshotlab.models.backbone import ensure_imagenet_weights
     from fewshotlab.paths import get_paths
@@ -276,7 +317,7 @@ def build_parser() -> argparse.ArgumentParser:
         "train",
         "train",
         "Fit one run from a config (support + validation only; never test).",
-        _not_implemented("train", "P3", "training engine"),
+        _run_train,
     )
     p.add_argument("--config", required=True, metavar="PATH", help="run config (YAML)")
     p.add_argument(
@@ -285,13 +326,19 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--allow-download", action="store_true", help="permit fetching missing pretrained weights"
     )
+    p.add_argument(
+        "--resume",
+        action="store_true",
+        help="continue an interrupted run as a new attempt from its saved model, optimizer "
+        "and epoch state",
+    )
 
     p = _command(
         sub,
         "evaluate",
         "evaluate",
         "Evaluate a stored run on validation, or on test only through the sealed gate.",
-        _not_implemented("evaluate", "P3", "evaluation"),
+        _run_evaluate,
     )
     p.add_argument("--run", required=True, metavar="RUN_ID")
     p.add_argument("--split", required=True, choices=SPLIT_CHOICES)
