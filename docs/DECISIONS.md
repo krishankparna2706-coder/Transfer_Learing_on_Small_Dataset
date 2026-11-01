@@ -155,3 +155,47 @@ Each entry records what was decided, why, and what it implies. Newest entries go
 - **Decision:** `python -m fewshotlab weights fetch` is an explicit, documented way to cache the
   ResNet18 IMAGENET1K_V1 weights for offline use. It is in addition to the spec's command list.
 - Every other command still needs `--allow-download` before it may fetch anything.
+
+## D-020 (2026-11-01): One tensor-based preprocessing implementation
+- **Decision:** transforms decode to float32 tensors in [0, 1] and apply
+  `torchvision.transforms.functional` operations (bilinear, antialiased). The CLI, reports and app
+  share this single path.
+- **Check:** the Flowers evaluation transform is verified to equal torchvision's own
+  `Resize(256) → CenterCrop(224) → Normalize` composition on tensors, bit for bit.
+- **Caveat:** results differ slightly from PIL-based resizing; that is why the transform ID pins the
+  torchvision and Pillow versions.
+
+## D-021 (2026-11-01): Augmentation randomness is per sample and per epoch
+- **Decision:** each training image draws its augmentation from a NumPy generator seeded by
+  (augmentation stream, train_seed, epoch, image_id).
+- **Draw order is fixed:** RandomResizedCrop parameters (torchvision's algorithm), then the
+  horizontal flip, then the vertical flip.
+- **Consequence:** results do not depend on DataLoader workers or batch order, and augmentation
+  never touches the global torch or NumPy state.
+
+## D-022 (2026-11-01): Freezing policy is enforced through module modes and checked
+- **Decision:** `enter_train_mode` replaces `model.train()`:
+  - frozen: the encoder goes back to eval mode;
+  - partial: every BatchNorm goes back to eval mode.
+- **Checks:** `check_train_mode` verifies `requires_grad` flags and modes. Tests prove that one AdamW
+  step changes exactly the permitted parameters and no frozen BatchNorm buffer. A negative control
+  shows that plain `model.train()` would change them.
+
+## D-023 (2026-11-01): AdamW weight decay applies to every trainable parameter
+- **Decision:** the v1 recipe states weight decay 1e-4 without exclusions. It therefore applies to
+  BatchNorm affine parameters and biases too (PyTorch's AdamW default behavior).
+- Excluding them would be a separately named recipe change.
+
+## D-024 (2026-11-01): Artifact formats are safe to load
+- **Learned models:** `best.ckpt` holds the state dict and the spec JSON, loaded with
+  `torch.load(weights_only=True)`. A test proves arbitrary pickled objects are refused.
+- **Prototypes:** `prototypes.npz` holds the matrix, class names and spec JSON, loaded with
+  `allow_pickle=False`.
+- **Every model is rebuilt from its spec:** encoder weights identity, class order, transform ID and
+  method parameters. A different dataset, class map, class order, transform or method is refused.
+
+## D-025 (2026-11-01): Prototype distances are computed exactly, in chunks
+- **Decision:** squared distances use `(q - p)²` summed in query chunks, not the
+  `|q|² - 2qp + |p|²` expansion. This avoids cancellation error, and ties go to the lowest class ID.
+- **Cache keys:** embedding caches are keyed by encoder SHA-256, transform ID, manifest SHA-256,
+  class-map SHA-256 and the ordered image-ID list. Any difference is a cache miss.

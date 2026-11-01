@@ -8,7 +8,7 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0 and P1 complete. P2 (methods) is in progress; training, evaluation, benchmark, report and demo commands exit 3 |
+| Implementation | P0, P1 and P2 complete (data tooling, transforms, the four methods, model persistence). P3 (training engine) is next; train, evaluate, benchmark, report and demo exit 3 |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
 | Benchmark | NOT_RUN (`runs/ledger.jsonl` is empty) |
 | Demo | NOT_RUN |
@@ -135,3 +135,46 @@ Each entry lists commands that were actually executed and what was observed.
 ### Readiness for P2
 Both datasets are prepared, audited and have supports. P2 (transforms and the four methods) needs
 the ResNet18 IMAGENET1K_V1 weights; `weights fetch` will download them (46,830,571 bytes).
+
+## P2: comparable model methods and preprocessing (2026-11-01)
+
+### What changed
+- **Preprocessing** (`data/transforms.py`, D-020/D-021): the protocol v1 contracts for Flowers
+  and NEU (train and eval) and for fixtures, each with a transform ID.
+- **Datasets** (`data/datasets.py`): support and validation only; **test records are refused**.
+- **Freezing** (`models/policies.py`, D-022): explicit per-method policies, `enter_train_mode`,
+  and AdamW parameter groups.
+- **Prototypes** (`models/prototypes.py`, D-025): the nearest-prototype rules, with explicit
+  rejection of bad embeddings.
+- **Persistence** (`models/spec.py`, D-024): the `ModelSpec` saved with every artifact, plus safe
+  save/load for checkpoints and prototype files.
+- **Registry and cache** (`models/methods.py`, `models/cache.py`): the method registry, shared
+  prediction and embedding paths, and content-addressed cache keys.
+- **Weights:** `weights fetch` downloaded ResNet18 IMAGENET1K_V1 (46,830,571 bytes; sha256
+  `f37072fd47e89c5e827621c5baffa7500819f7896bbacec160b1a16c560e07ec`, prefix-verified).
+
+### Commands executed and observed results
+
+| Command | Observed |
+|---|---|
+| `uv run python -m fewshotlab weights fetch` | downloaded in 30 s; SHA-256 prefix matches torchvision's file name; doctor reports `resnet18_weights_cached: PASS` |
+| `uv run pytest -q tests/test_p2_*.py` | 56 passed, including 4 checks with the real ImageNet weights |
+| `uv run pytest -q` | 194 passed |
+| `uv run ruff check .` and `ruff format --check .` | clean |
+
+### P2 evidence table
+
+| Criterion | Status | Test | Observed |
+|---|---|---|---|
+| Gradient and before/after tests prove only the permitted parameters change; BatchNorm buffers stay identical where frozen | PASS | `test_p2_policies.py`, `test_p2_real_weights.py` | one AdamW step changes exactly: all parameters (scratch); head only (frozen); layer4 + head (partial). Frozen running statistics are byte-identical; the negative control shows `model.train()` alone would change them |
+| Hand-computed prototype example; zero, non-finite and norm ≤ 1e-12 embeddings rejected without clamping | PASS | `test_p2_prototypes.py` | prototypes [[0.3, 0.9], [1, 0]]; distances [0.2029437, 0.5857864]; class 0; scores softmax(−d). All 5 rejection cases plus an overflowing norm are refused |
+| Save/reload reproduces predictions within a declared tolerance; incompatible class maps rejected | PASS | `test_p2_persistence.py` | CPU tolerance atol 1e-6, observed equal. A NEU model with a Flowers class map, or a different dataset, transform, order or method, is refused. Pickled objects are refused |
+| Output dimensions 102 and 6; transforms cannot read test labels | PASS | `test_p2_methods_cache.py`, `test_p2_dataset.py` | shapes (2, 102) and (2, 6); datasets refuse test records (ProtocolRefusal) |
+| Fresh initialization; cache keys separate encoder, dataset, class order, transform and support | PASS | `test_p0_fixture_forward.py`, `test_p2_methods_cache.py` | a seeded, isolated init per build; each cache-key component changes the key |
+| Same image → identical evaluation tensor; numeric grayscale and normalization check; training transforms keep shape and label | PASS | `test_p2_transforms.py`, `test_p2_dataset.py` | equal tensors; constant gray 128 → (128/255 − mean_c)/std_c in all 3 channels; augmentation reproducible from its labels |
+
+### Remaining numerical caveats
+- P2 checks run on CPU. MPS behavior and determinism are measured in P3.
+- Tensor resizing differs slightly from PIL resizing (D-020).
+
+**Benchmark metrics: all NOT_RUN.**
