@@ -1,0 +1,39 @@
+# FewShotLab study protocol v1: a preregistered starting recipe, not a claim of optimality.
+# The test suite checks these values against src/fewshotlab/config.py so the two cannot drift.
+protocol_id: fewshotlab-v1
+backbone: resnet18
+weights: IMAGENET1K_V1          # transfer methods; scratch starts from random initialization
+datasets:
+  flowers102:
+    num_classes: 102
+    split_source: official setid.mat (trnid / valid / tstid); never re-split or merged
+    expected_counts: {train: 1020, val: 1020, test: 6149}
+  neu_cls:
+    num_classes: 6
+    split_source: project split, 180/60/60 images per class, split_seed 2026, after the duplicate/group audit
+    split_seed: 2026
+    expected_counts: {train: 1080, val: 360, test: 360}
+shots: [1, 3, 5, 10]
+support_seeds: [11, 22, 33, 44, 55]
+methods: [scratch, frozen, partial, prototypes]
+recipe:
+  train: {max_epochs: 100, patience: 15, batch_size_cap: 32, num_workers: 0}
+  optimizer:
+    name: adamw
+    weight_decay: 0.0001
+    betas: [0.9, 0.999]
+    eps: 1.0e-08
+    lr_scratch: 0.001
+    lr_head: 0.001
+    lr_layer4: 0.0001
+  selection:
+    metric: macro_f1
+    tie_breakers: [lower_val_loss, earlier_epoch]
+    patience_min_delta: 0.001
+  precision: float32
+metrics:
+  primary: macro_f1
+  zero_division: 0
+  secondary: [top1, balanced_accuracy, per_class_precision_recall_f1_support, confusion_raw, confusion_row_normalized]
+  flowers_only: [top5]
+test_access: locked

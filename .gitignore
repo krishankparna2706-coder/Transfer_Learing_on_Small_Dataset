@@ -1,0 +1,40 @@
+# --- Python and tooling ---------------------------------------------------
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# --- OS / editor ----------------------------------------------------------
+.DS_Store
+.idea/
+.vscode/
+
+# --- Specification PDFs stay local (decision D-004); cited by SHA-256 ------
+/FewShotLab_0*.pdf
+
+# --- Large or private inputs: never committed ------------------------------
+data/raw/
+data/tmp/
+.cache/
+uploads/
+
+# --- Run artifacts: only the README and the append-only ledger are tracked -
+runs/*
+!runs/README.md
+!runs/ledger.jsonl
+
+# --- Heavy model / feature artifacts anywhere -------------------------------
+*.ckpt
+*.pth
+*.pt
+*.npz
+*.safetensors
+
+# --- Streamlit secrets (none are used; ignored defensively) ----------------
+.streamlit/secrets.toml

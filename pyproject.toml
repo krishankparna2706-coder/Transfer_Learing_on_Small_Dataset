@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "fewshotlab"
+version = "0.1.0"
+description = "Reproducible experiments on transfer learning with very few labeled images (ResNet18; Flowers102 and NEU-CLS)."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "torch>=2.1",
+    "torchvision>=0.16",
+    "numpy",
+    "scipy",
+    "pillow",
+    "pyyaml",
+    "pandas",
+    "matplotlib",
+    "streamlit",
+]
+
+[project.scripts]
+fewshotlab = "fewshotlab.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "ruff",
+    "scikit-learn",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fewshotlab"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "slow: longer CPU tests (still offline)",
+    "network: needs network access; opt-in with FEWSHOTLAB_NETWORK_TESTS=1",
+    "real_data: needs prepared real datasets under data/raw",
+    "mps: needs an available Apple MPS device",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests", "app"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
