@@ -154,6 +154,55 @@ def _run_evaluate(args: argparse.Namespace) -> int:
     return ExitCode.OK if verification["identical_predictions"] else ExitCode.FAILURE
 
 
+def _run_benchmark(args: argparse.Namespace) -> int:
+    from fewshotlab.engine.study import (
+        load_study,
+        plan_study,
+        run_study,
+        slot_status,
+        verify_plan,
+        write_plan,
+    )
+    from fewshotlab.paths import get_paths
+
+    paths = get_paths()
+    study = load_study(args.config)
+    if args.dry_run:
+        slots = plan_study(study, paths)
+        checks = verify_plan(slots)
+        plan = write_plan(study, slots, checks, paths)
+        unique = sum(1 for s in slots if not s.duplicate_of)
+        print(
+            f"{study['study_id']}: {len(slots)} logical slots, {unique} unique runs "
+            f"(category {study['category']}); nothing was run"
+        )
+        for check in checks:
+            print(f"  {check['status']} {check['check']}: {check['detail']}")
+        for slot in slots:
+            state = slot_status(paths, slot)["status"]
+            print(
+                f"  {slot.dataset} K={slot.k} {slot.method} seed={slot.seed}: {state}  "
+                f"{slot.run_id}"
+            )
+        print(f"plan: {plan}")
+        return ExitCode.FAILURE if any(c["status"] == "FAIL" for c in checks) else ExitCode.OK
+    outcomes = run_study(
+        study,
+        paths=paths,
+        device_override=args.device,
+        allow_download=args.allow_download,
+        command=["python", "-m", "fewshotlab", *sys.argv[1:]],
+    )
+    for outcome in outcomes:
+        print(
+            f"  {outcome['status']:<12} {outcome['outcome']:<8} {outcome['run_id']}"
+            + (f"  ({outcome['error']})" if "error" in outcome else "")
+        )
+    failed = [o for o in outcomes if o["status"] == "FAILED"]
+    print(f"{study['study_id']}: {len(outcomes)} slots; {len(failed)} failed")
+    return ExitCode.FAILURE if failed else ExitCode.OK
+
+
 def _run_weights_fetch(args: argparse.Namespace) -> int:
     from fewshotlab.models.backbone import ensure_imagenet_weights
     from fewshotlab.paths import get_paths
@@ -349,13 +398,19 @@ def build_parser() -> argparse.ArgumentParser:
         "benchmark",
         "benchmark",
         "Plan or execute a prespecified experiment matrix.",
-        _not_implemented("benchmark", "P4", "experiment matrix execution"),
+        _run_benchmark,
     )
     p.add_argument("--config", required=True, metavar="PATH", help="study config (YAML)")
     p.add_argument(
         "--dry-run",
         action="store_true",
         help="list planned slots and duplicates without running anything",
+    )
+    p.add_argument(
+        "--device", choices=DEVICE_CHOICES, default=None, help="override the study's device"
+    )
+    p.add_argument(
+        "--allow-download", action="store_true", help="permit fetching missing pretrained weights"
     )
 
     p = _command(

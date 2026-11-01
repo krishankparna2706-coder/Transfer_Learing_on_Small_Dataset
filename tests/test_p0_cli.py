@@ -14,7 +14,7 @@ DOCUMENTED_FLAGS = {
     ("support", "build"): ["--config", "--dataset"],
     ("train",): ["--config", "--device", "--allow-download", "--resume"],
     ("evaluate",): ["--run", "--split", "--device"],
-    ("benchmark",): ["--config", "--dry-run"],
+    ("benchmark",): ["--config", "--dry-run", "--device", "--allow-download"],
     ("lock-test",): ["--plan"],
     ("report",): ["--ledger", "--out"],
     ("demo",): ["--port"],
@@ -22,7 +22,6 @@ DOCUMENTED_FLAGS = {
 
 # Commands that are still stubs in this phase, with the phase that implements them.
 STUBS = {
-    "benchmark": (["benchmark", "--config", "configs/not-used.yaml"], "P4"),
     "lock-test": (["lock-test", "--plan", "configs/not-used.yaml"], "P5"),
     "report": (["report"], "P4"),
     "demo": (["demo"], "P6"),

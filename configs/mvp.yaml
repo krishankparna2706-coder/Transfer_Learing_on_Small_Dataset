@@ -1,0 +1,12 @@
+# P4 MVP study: exploratory and validation-only. Flowers102, K in {1, 10}, all four methods,
+# support/train seed 11, the full v1 recipe. The slots expand to exactly the run configs in
+# configs/mvp/ (identical config hashes and run IDs).
+study_id: fewshotlab-v1-mvp
+protocol_id: fewshotlab-v1
+category: mvp
+description: Eight exploratory validation-only jobs (P4).
+datasets: [flowers102]
+shots: [1, 10]
+methods: [scratch, frozen, partial, prototypes]
+support_seeds: [11]
+device: auto

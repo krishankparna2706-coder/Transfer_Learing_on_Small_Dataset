@@ -1,0 +1,12 @@
+# P5 full study (prepared in P4; NOT RUN): 2 datasets x 4 K x 4 methods x 5 seeds = 160 logical
+# slots. Deterministic prototype slots with identical support membership (Flowers K=10, every seed)
+# are counted once, which leaves 156 unique runs. Test evaluation happens only after the P5 seal.
+study_id: fewshotlab-v1-full
+protocol_id: fewshotlab-v1
+category: core
+description: Core benchmark matrix (P5).
+datasets: [flowers102, neu_cls]
+shots: [1, 3, 5, 10]
+methods: [scratch, frozen, partial, prototypes]
+support_seeds: [11, 22, 33, 44, 55]
+device: auto

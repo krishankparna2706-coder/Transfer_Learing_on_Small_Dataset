@@ -65,6 +65,9 @@ def test_fixture_run_completes_with_full_evidence(paths, method):
     assert (doc["status"], doc["split"], doc["is_fixture"]) == ("COMPLETED", "val", True)
     assert doc["metrics"]["macro_f1"] >= 0.5  # learnable colours: well above chance (1/3)
     assert verify_evidence(adir) is None  # metrics regenerate from the stored predictions
+    trainable = {"scratch": 11_178_051, "frozen": 1_539, "partial": 8_395_267, "prototypes": 0}
+    assert doc["parameters"] == {"trainable": trainable[method], "total": 11_178_051}
+    assert doc["timing"]["total_wall_seconds"] > 0 and doc["timing"]["val_pass_ms_per_image"] > 0
     provenance = read_json(adir / "provenance.json")
     assert len(provenance["code"]["source_sha256"]) == 64
     assert provenance["data"]["support"]["content_sha256"]

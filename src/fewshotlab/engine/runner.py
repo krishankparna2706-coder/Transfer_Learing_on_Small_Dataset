@@ -13,6 +13,7 @@ import io
 import json
 import shutil
 import sys
+import time
 import traceback
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
@@ -307,6 +308,7 @@ def run_training(
     )
     append_event(paths, **event, status=RunStatus.RUNNING.value, resumed_from=resumed_from)
     try:
+        run_started = time.perf_counter()
         init_seed = init_seed_for(cfg.train_seed)
         model, weights = build_model(
             cfg.method,
@@ -316,6 +318,10 @@ def run_training(
             allow_download=allow_download,
             init_override=init_override,
         )
+        parameters = {
+            "trainable": int(sum(p.numel() for p in model.parameters() if p.requires_grad)),
+            "total": int(sum(p.numel() for p in model.parameters())),
+        }
         eval_spec = spec_for(cfg.dataset, "eval")
         spec = ModelSpec(
             method=cfg.method,
@@ -440,7 +446,20 @@ def run_training(
             "predictions": {"file": "predictions_val.csv", "sha256": predictions_sha},
             "artifact": artifact,
             "reload_check": result.reload_check,
-            "timing": result.timing,
+            "parameters": parameters,
+            "timing": {
+                **result.timing,
+                "total_wall_seconds": time.perf_counter() - run_started,
+                "val_pass_ms_per_image": 1000.0
+                * (
+                    result.timing["val_seconds_per_epoch"][-1]
+                    if "val_seconds_per_epoch" in result.timing
+                    else result.timing["val_seconds"]
+                )
+                / len(validation),
+                "timing_note": "wall-clock on the recorded device; validation passes use batch "
+                "size 64 and include image decoding; not a latency benchmark",
+            },
             "memory": result.memory,
             "device": device,
             "computed_from": "predictions_val.csv via fewshotlab.metrics.core."

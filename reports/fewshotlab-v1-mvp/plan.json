@@ -1,0 +1,174 @@
+{
+  "checks": [
+    {
+      "check": "unique_run_ids",
+      "detail": "8 unique of 8",
+      "status": "PASS"
+    },
+    {
+      "check": "shared_support_ids",
+      "detail": "every method at a dataset/K/seed reads the same support manifest",
+      "status": "PASS"
+    },
+    {
+      "check": "initialization_policy",
+      "detail": "scratch starts from random init; frozen/partial/prototypes from IMAGENET1K_V1",
+      "status": "PASS"
+    },
+    {
+      "check": "paired_init_seed",
+      "detail": "init seed depends only on train_seed (= support_seed)",
+      "status": "PASS"
+    },
+    {
+      "check": "identical_training_transform_per_dataset",
+      "detail": "{'flowers102': ['b5bbd7ad654b4be4']}",
+      "status": "PASS"
+    },
+    {
+      "check": "single_recipe",
+      "detail": "1 distinct recipe(s) across learned slots",
+      "status": "PASS"
+    }
+  ],
+  "generated_utc": "2026-11-01T15:14:29Z",
+  "logical_slots": 8,
+  "slots": [
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "8f124a298233b2078fce70b2a36fbccc58813dba5665a7fe982262464be25ac6",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 1,
+      "method": "scratch",
+      "run_id": "mvp__fewshotlab-v1__flowers102__scratch__k1__s11__cfg8f124a29",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "d60f539db24254d0a24e764a0458a56f3e38ee61e5e7e7f2ecf917d66b8b08d2",
+      "support_sha256": "fdf6f2adc5ba4188d2399864340f90416af83cf8fa4e648b4f8c49748b34ba42"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "5c36cc8c737ac8e1c6382bc0e8aee4981e978994d8b939744e5c79ebbd4b2caf",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 1,
+      "method": "frozen",
+      "run_id": "mvp__fewshotlab-v1__flowers102__frozen__k1__s11__cfg5c36cc8c",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "d60f539db24254d0a24e764a0458a56f3e38ee61e5e7e7f2ecf917d66b8b08d2",
+      "support_sha256": "fdf6f2adc5ba4188d2399864340f90416af83cf8fa4e648b4f8c49748b34ba42"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "a97c33c5008429d3610bda36d0db3189b384c3da318c1210c396e7c4250a5258",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 1,
+      "method": "partial",
+      "run_id": "mvp__fewshotlab-v1__flowers102__partial__k1__s11__cfga97c33c5",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "d60f539db24254d0a24e764a0458a56f3e38ee61e5e7e7f2ecf917d66b8b08d2",
+      "support_sha256": "fdf6f2adc5ba4188d2399864340f90416af83cf8fa4e648b4f8c49748b34ba42"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "2f1baf0fb111365a622cee5aaa75a8023493b5d49feb73939f429d6f60c8fce7",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 1,
+      "method": "prototypes",
+      "run_id": "mvp__fewshotlab-v1__flowers102__prototypes__k1__s11__cfg2f1baf0f",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "d60f539db24254d0a24e764a0458a56f3e38ee61e5e7e7f2ecf917d66b8b08d2",
+      "support_sha256": "fdf6f2adc5ba4188d2399864340f90416af83cf8fa4e648b4f8c49748b34ba42"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "5a3c0b1a96517492c2dfcc4018155b7583a753d08b0899e3a62ff3f1d4777ecd",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 10,
+      "method": "scratch",
+      "run_id": "mvp__fewshotlab-v1__flowers102__scratch__k10__s11__cfg5a3c0b1a",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "53c87c3daba750a34f51722ca221ca60539e6bb36300bb60e4e40c814451a448",
+      "support_sha256": "11029b7cadfb8233dc55a263b8c4cb1e9d925c2388a08a16f2d0ef012e27fc8f"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "9d7734055515f0ab8f4feb6671f796afd1c75af9943c36436de14b780995b1d0",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 10,
+      "method": "frozen",
+      "run_id": "mvp__fewshotlab-v1__flowers102__frozen__k10__s11__cfg9d773405",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "53c87c3daba750a34f51722ca221ca60539e6bb36300bb60e4e40c814451a448",
+      "support_sha256": "11029b7cadfb8233dc55a263b8c4cb1e9d925c2388a08a16f2d0ef012e27fc8f"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "6c553c7e57e789c5d4220d2faa9c55439d0832ce088a0ac317b73d714008874b",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 10,
+      "method": "partial",
+      "run_id": "mvp__fewshotlab-v1__flowers102__partial__k10__s11__cfg6c553c7e",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "53c87c3daba750a34f51722ca221ca60539e6bb36300bb60e4e40c814451a448",
+      "support_sha256": "11029b7cadfb8233dc55a263b8c4cb1e9d925c2388a08a16f2d0ef012e27fc8f"
+    },
+    {
+      "attempt_id": null,
+      "attempts": 0,
+      "config_sha256": "07e5ae7e00f8957291331b1922d69f2f6026373323a6441cd33e1e1bbf2886c0",
+      "dataset": "flowers102",
+      "duplicate_of": null,
+      "k": 10,
+      "method": "prototypes",
+      "run_id": "mvp__fewshotlab-v1__flowers102__prototypes__k10__s11__cfg07e5ae7e",
+      "seed": 11,
+      "status": "NOT_RUN",
+      "support_membership_sha256": "53c87c3daba750a34f51722ca221ca60539e6bb36300bb60e4e40c814451a448",
+      "support_sha256": "11029b7cadfb8233dc55a263b8c4cb1e9d925c2388a08a16f2d0ef012e27fc8f"
+    }
+  ],
+  "study": {
+    "category": "mvp",
+    "datasets": [
+      "flowers102"
+    ],
+    "description": "Eight exploratory validation-only jobs (P4).",
+    "device": "auto",
+    "methods": [
+      "scratch",
+      "frozen",
+      "partial",
+      "prototypes"
+    ],
+    "protocol_id": "fewshotlab-v1",
+    "shots": [
+      1,
+      10
+    ],
+    "study_id": "fewshotlab-v1-mvp",
+    "support_seeds": [
+      11
+    ]
+  },
+  "unique_runs": 8
+}

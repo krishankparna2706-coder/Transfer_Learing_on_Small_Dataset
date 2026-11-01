@@ -1,0 +1,11 @@
+# DIAGNOSTIC run (ledger category "diagnostic"): 2 epochs at K=1 to check batch flow (102 images ->
+# batches of 32, 32, 32 and 6) and finite losses before the P4 MVP. Its numbers are not results.
+dataset: flowers102
+method: scratch
+shots: 1
+support_seed: 11
+split_manifest: data/manifests/flowers102-v1.csv
+support_manifest: data/manifests/supports/flowers102-k1-s11.json
+category: diagnostic
+train: {max_epochs: 2}
+device: auto

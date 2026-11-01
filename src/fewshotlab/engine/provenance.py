@@ -54,16 +54,27 @@ def _git(root: Path, *args: str) -> str | None:
     return out.stdout if out.returncode == 0 else None
 
 
+def is_code_path(relative: str) -> bool:
+    """Code, configs and locks: the files whose changes alter what a run executes."""
+    first = relative.split("/", 1)[0]
+    return first in CODE_ROOTS or relative in CODE_FILES
+
+
 def git_state(root: Path) -> dict[str, Any]:
+    """``dirty`` means code, config or lock changes relative to HEAD. Generated records
+    (ledger, manifests, reports) are listed separately because runs append to them."""
     commit = _git(root, "rev-parse", "HEAD")
     porcelain = _git(root, "status", "--porcelain")
-    diff = _git(root, "diff", "HEAD")
+    changed = [line[3:].strip('"') for line in (porcelain or "").splitlines()]
+    code_changes = [path for path in changed if is_code_path(path)]
+    diff = _git(root, "diff", "HEAD", "--", *CODE_ROOTS, *CODE_FILES)
     return {
         "commit": commit.strip() if commit else None,
         "branch": (_git(root, "rev-parse", "--abbrev-ref", "HEAD") or "").strip() or None,
-        "dirty": bool(porcelain and porcelain.strip()),
-        "changed_paths": [line[3:] for line in (porcelain or "").splitlines()][:200],
-        "tracked_diff_sha256": sha256_bytes(diff.encode()) if diff else None,
+        "dirty": bool(code_changes),
+        "changed_code_paths": code_changes[:200],
+        "changed_other_paths": [p for p in changed if not is_code_path(p)][:200],
+        "code_diff_sha256": sha256_bytes(diff.encode()) if diff else None,
     }
 
 
