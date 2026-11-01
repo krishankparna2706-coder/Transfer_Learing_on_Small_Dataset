@@ -5,8 +5,9 @@ visual representation help when each class has only 1, 3, 5 or 10 labeled traini
 how do cost, variability and errors change across adaptation methods?**
 
 > **Status:** see [docs/PROGRESS.md](docs/PROGRESS.md) for the current phase and its evidence.
-> Until real runs exist, **every benchmark metric is NOT_RUN**. Commands that belong to later
-> phases exit with code 3 ("not implemented") and write nothing.
+> Validation numbers are development results. **Held-out test metrics stay NOT_RUN** until the
+> evaluation plan is sealed (`lock-test`) and the sealed evaluation has run. Commands that belong
+> to later phases exit with code 3 ("not implemented") and write nothing.
 
 ## Scope
 
@@ -81,10 +82,11 @@ All commands run as `python -m fewshotlab <command>`.
 | `support build --config PATH [--dataset ...]` | P1 | implemented |
 | `weights fetch` | P2 | implemented (explicit download of ResNet18 IMAGENET1K_V1) |
 | `train --config PATH [--device ...] [--allow-download] [--resume]` | P3 | implemented (support + validation only) |
-| `evaluate --run RUN_ID --split {val,test} [--device ...]` | P3 / P5 | `val` re-check implemented; `test` refused until the P5 seal (exit 5) |
+| `evaluate --split val --run RUN_ID [--device ...]` | P3 | implemented (re-scores a stored run's validation set; a verification, not a new result) |
+| `evaluate --split test --study PATH [--run RUN_ID] [--device ...]` | P5 | implemented; refuses (exit 5) unless the study's sealed plan still matches every current file; each sealed run is evaluated once |
 | `benchmark --config PATH [--dry-run] [--device ...] [--allow-download]` | P4 | implemented (study plan, pre-flight checks, runs unfinished slots) |
-| `lock-test --plan PATH` | P5 | not implemented yet |
-| `report [--ledger PATH] [--out DIR] [--study PATH]` | P4 | implemented (validation-only comparison from stored predictions) |
+| `lock-test --plan PATH [--dry-run] [--skip-reproduction] [--allow-partial] [--device ...]` | P5 | implemented (`--dry-run` previews the seal and seals nothing) |
+| `report [--ledger PATH] [--out DIR] [--study PATH]` | P4 / P5 | implemented (validation comparison and seed aggregates; test tables only after a sealed evaluation) |
 | `demo [--port N]` | P6 | not implemented yet |
 
 Exit codes:

@@ -22,7 +22,6 @@ from typing import Any
 
 import numpy as np
 import torch
-from torch.utils.data import DataLoader
 
 from fewshotlab.config import RunConfig, config_hash, load_run_config, resolved_yaml
 from fewshotlab.data.datasets import ManifestImageDataset
@@ -34,17 +33,16 @@ from fewshotlab.devices import resolve_device
 from fewshotlab.engine import artifacts
 from fewshotlab.engine.environment import configure_determinism, environment_report
 from fewshotlab.engine.gate import require_sealed_plan
+from fewshotlab.engine.inference import eval_loader, load_stored_model
 from fewshotlab.engine.ledger import append_event
 from fewshotlab.engine.provenance import git_state, source_digest, write_source_snapshot
 from fewshotlab.engine.trainer import (
-    EVAL_BATCH_SIZE,
     RESUME_FORMAT,
     SupportSet,
     ValidationSet,
     fit_learned,
     fit_prototype_method,
     query_outputs,
-    validate,
 )
 from fewshotlab.errors import ConfigError, DataValidationError, ProtocolRefusal
 from fewshotlab.hashing import sha256_file
@@ -53,7 +51,6 @@ from fewshotlab.metrics.core import check_prediction_ids, classification_metrics
 from fewshotlab.models.methods import build_model, get_method
 from fewshotlab.models.prototypes import EPSILON
 from fewshotlab.models.spec import (
-    IncompatibleModelError,
     ModelSpec,
     load_linear,
     load_prototypes,
@@ -557,47 +554,18 @@ def evaluate_run(
         raise ConfigError("split must be 'val' or 'test'")
     adir = latest_completed_attempt(paths, run_id)
     cfg = load_run_config(adir / "config.resolved.yaml")
-    spec = ModelSpec.from_json(read_json(adir / "model_spec.json"))
-    if spec_for(cfg.dataset, "eval").transform_id != spec.eval_transform_id:
-        raise IncompatibleModelError(
-            "this code version's evaluation transform differs from the "
-            "one the model was trained with"
-        )
     inputs = resolve_inputs(cfg, paths)
     device = resolve_device(device_override or cfg.device)
-    expected = {
-        "dataset": cfg.dataset,
-        "class_map_sha256": inputs["class_map"].sha256(),
-        "eval_transform_id": spec.eval_transform_id,
-        "method": cfg.method,
-    }
-    if get_method(cfg.method).learned:
-        model, _ = load_linear(adir / "best.ckpt", **expected)
-        loader = DataLoader(
+    model = load_stored_model(adir, paths, inputs["class_map"], device)
+    spec = model.spec
+    outputs = model.score(
+        eval_loader(
             ManifestImageDataset(
                 inputs["validation"].records, paths.data_root, build_transform(cfg.dataset, "eval")
             ),
-            batch_size=EVAL_BATCH_SIZE,
-            shuffle=False,
+            cfg.train.num_workers,
         )
-        outputs, _, _ = validate(
-            model.to(device), loader, device, inputs["class_map"].num_classes, cfg.dataset
-        )
-    else:
-        if spec.encoder.get("weights_id") == "none":
-            from fewshotlab.models.backbone import build_resnet18
-
-            encoder, _ = build_resnet18(
-                spec.num_classes, init="random", init_seed=int(spec.encoder["init_seed"])
-            )
-            prototypes = load_prototypes(adir / "prototypes.npz", **expected)[1]
-        else:
-            encoder, prototypes, _ = load_prototypes(
-                adir / "prototypes.npz", weights_dir=paths.weights_dir, **expected
-            )
-        outputs = query_outputs(
-            encoder, prototypes, inputs["validation"], cfg, data_root=paths.data_root, device=device
-        )
+    )
     stored = artifacts.read_predictions(adir / "predictions_val.csv")
     ids = [inputs["validation"].records[int(i)].image_id for i in outputs.indices]
     order = {image_id: i for i, image_id in enumerate(ids)}

@@ -336,3 +336,95 @@ Each entry records what was decided, why, and what it implies. Newest entries go
   report regenerated with identical values afterwards.
 - **Note:** ledger events written before this change record `run_dir` as `runs/<run_id>/<attempt>`;
   `run_root()` is authoritative. New events record `runs/artifacts/<run_id>/<attempt>`.
+
+## D-040 (2026-11-01): What the seal compares, and what it only records
+- **Content** is re-derived from the current files on every test access and must match exactly:
+  - the code digest over `src/`, `configs/` and the lock and project files (`tests/` and `app/`
+    are excluded, so the P6 app can be built later), plus per-file hashes of the protocol modules;
+  - library versions and the evaluation device;
+  - data, support, run, weight, metric, scorer, calibration, corruption, demo, replay, test-plan
+    and report-rule entries.
+- **Attestations** are recorded once, when sealing, and covered by the plan hash:
+  - the git commit and branch;
+  - the commits that trained the sealed runs, and the sealed files changed since;
+  - the validation reproduction (D-041).
+- **Why the commit is not compared:** committing the sealed plan itself moves HEAD. The code digest
+  is what identifies the code that evaluates test.
+
+## D-041 (2026-11-01): Validation reproduction before sealing
+- **Context:** the core matrix was trained at commit `64c7d25`. The P5 tooling changed sealed code
+  afterwards, notably the `ImageTransform.apply_tensor` refactor and a shared inference loader for
+  validation and test.
+- **Decision:** `lock-test` re-scores every sealed run's validation set with the current code.
+  Sealing refuses unless every run's predictions are identical to the stored ones. The results
+  (including the largest score difference) are part of the sealed attestations.
+
+## D-042 (2026-11-01): Corruption implementation details
+- **Order:** decode, then corrupt at native resolution in [0, 1], then the dataset's evaluation
+  resize and normalization. The clean condition goes through the same code and equals the normal
+  evaluation input exactly (tested).
+- **Grayscale:** images with grayscale content are corrupted as one channel, so the noise stays
+  gray, then replicated to three channels.
+- **Blur:** separable Gaussian with 2·ceil(3σ)+1 taps and `reflect` padding (the edge pixel is not
+  repeated). It is tested against `scipy.ndimage.gaussian_filter(mode="mirror", truncate=3)`.
+- **Records:** every derivative records its parameters, seed, implementation ID and a SHA-256 of
+  its float32 pixels. The pixel checksums are written during the sealed robustness evaluation,
+  because computing them earlier would mean reading test pixels before the seal.
+
+## D-043 (2026-11-01): The demo cell is fixed by the protocol
+- **Default:** NEU-CLS, K = 10, support seed 11.
+- **Fixtures only:** a study config may name another cell (`demo:`); core and MVP studies that try
+  are refused.
+- **Selection:** all candidates must be COMPLETED with verified evidence. The highest validation
+  macro-F1 wins, and exact ties go to the lexically first method name.
+
+## D-044 (2026-11-01): Review routing
+- **Score:** the maximum class score. It is uncalibrated, and no calibration is fitted (sealed as
+  `calibration: none`).
+- **Threshold:** the highest value in {0, 0.05, …, 1} that keeps at least 80 % coverage on the demo
+  run's stored validation predictions. Threshold 0 always qualifies.
+- **Rule:** review when the score is strictly below the threshold.
+- **Reporting:** coverage and the error among accepted predictions are always reported together.
+  The accepted error is null when nothing is accepted.
+
+## D-045 (2026-11-01): Replay manifest
+- **Order:** a seeded permutation of the sorted NEU test IDs. It does not depend on labels or
+  pixels, so no favourable subset can be picked.
+- **Streams:** seven, in a fixed sequence (clean first) over the same parents in the same order.
+  The true class is copied from the split manifest for demonstration mode.
+- **Sealing:** the CSV is written next to the sealed plan and sealed by its SHA-256. P7 consumes it
+  unchanged.
+
+## D-046 (2026-11-01): One result per sealed run
+- **Scope:** `evaluate --split test --study PATH` verifies the seal, then evaluates each sealed run
+  that has no recorded evaluation, plus the robustness study of the demo checkpoint.
+- **Outputs:** they go into the sealed attempt folder, and their hashes into the evaluation ledger.
+- **Refusals:**
+  - re-running a recorded evaluation is skipped;
+  - an unrecorded test file blocks evaluation and sealing;
+  - a device other than the sealed one is refused.
+- **Isolation:** test images enter a model only through `GatedTestDataset`, which requires a
+  verified seal. A static test checks that the trainer, runner, study planner and training
+  datasets never import the test gate or the simulation package.
+
+## D-047 (2026-11-01): Test-output audit
+- `audit_test_outputs` (run by the repository guardrail test) finds every test-split file under
+  `runs/` (symlinks followed), `demo_assets/` and `reports/<study>/test/`.
+- **Per-run files** must match a hash recorded by a sealed evaluation event.
+- **Report files** need an intact seal for their study.
+- `report --study` writes test tables only after a sealed evaluation, so a test folder can never
+  appear before the seal.
+
+## D-048 (2026-11-01): Seed aggregation
+- **Cells:** per dataset × K × method, the mean and sample SD (ddof = 1) over **distinct** runs. A
+  deterministic duplicate (Flowers K=10 prototypes) counts once, so its SD is null.
+- **Paired differences:** per dataset × K over matched support seeds (mean, SD, min, max, and the
+  number of seeds where A > B).
+- **Intervals:** no population confidence interval is computed from five seeds. Validation
+  aggregates carry the "VALIDATION ONLY, optimistic" banner. Test aggregates exist only after the
+  sealed evaluation.
+
+## D-049 (2026-11-01): Partial seals
+- If some planned runs are missing, sealing refuses unless `--allow-partial` is given.
+- A partial seal is labelled partial in the plan, the ledger and the CLI output.
+- The missing slots and their statuses are part of the sealed content.

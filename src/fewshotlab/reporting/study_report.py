@@ -58,6 +58,16 @@ BANNER = (
     "None of them is a held-out test result, and they are not comparable with published "
     "Flowers102 test benchmarks."
 )
+BANNER_MULTI_SEED = (
+    "VALIDATION ONLY: development results over several support seeds per cell. Each learned "
+    "model's checkpoint was selected on these same validation images, so its numbers are "
+    "optimistic. None of them is a held-out test result, and they are not comparable with "
+    "published Flowers102 test benchmarks. Seed aggregates are in aggregate_val.md."
+)
+
+
+def banner_for(study: dict[str, Any]) -> str:
+    return BANNER if len(study["support_seeds"]) == 1 else BANNER_MULTI_SEED
 
 
 def slot_row(paths: ProjectPaths, slot) -> dict[str, Any]:
@@ -161,7 +171,12 @@ def build_study_report(
     *,
     sanity: bool = True,
     errors: bool = True,
+    run_plots: bool | None = None,
 ) -> dict[str, Any]:
+    """Per-slot validation report. For multi-seed studies the per-slot chart is replaced by the
+    seed-aggregated chart (``benchmark_report``) and per-run plots stay in the run folders."""
+    single_seed = len(study["support_seeds"]) == 1
+    run_plots = single_seed if run_plots is None else run_plots
     slots = plan_study(study, paths)
     rows = [slot_row(paths, slot) for slot in slots]
     out = Path(out_root) / study["study_id"]
@@ -200,9 +215,9 @@ def build_study_report(
         f"{study['study_id']}: VALIDATION ONLY{' SOFTWARE FIXTURE' if fixture else ''}, "
         f"n=1 run per point (seeds {study['support_seeds']}); not a test result"
     )
-    plot = _plot(rows, out / "plots" / "val_metrics_by_k.png", title)
+    plot = _plot(rows, out / "plots" / "val_metrics_by_k.png", title) if single_seed else None
     for row in rows:  # copy per-run plots (no dataset images) next to the report
-        if row.get("_attempt_dir"):
+        if run_plots and row.get("_attempt_dir"):
             for name in ("learning_curves.png", "confusion_val.png"):
                 source = row["_attempt_dir"] / "plots" / name
                 if source.is_file():
@@ -222,7 +237,7 @@ def build_study_report(
     summary = {
         "study": study,
         "generated_utc": utc_now(),
-        "banner": BANNER,
+        "banner": banner_for(study),
         "rows": public,
         "plot": str(plot.relative_to(out)) if plot else None,
         "sanity": sanity_results,
@@ -240,7 +255,7 @@ def _markdown(study, rows, summary, fixture) -> str:
     lines = [
         f"# {study['study_id']}: validation comparison",
         "",
-        f"> **{BANNER}**" + (" **SOFTWARE FIXTURE: not real data.**" if fixture else ""),
+        f"> **{summary['banner']}**" + (" **SOFTWARE FIXTURE: not real data.**" if fixture else ""),
         "",
         f"Generated {summary['generated_utc']} from the run ledger and the stored prediction "
         f"files. Slot statuses: {statuses}. Every metric value regenerates from its run's "

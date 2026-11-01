@@ -39,7 +39,7 @@ def _prepared(dataset):
 
 
 @pytest.mark.parametrize("dataset", DATASETS)
-def test_manifest_counts_and_file_hashes(dataset):
+def test_manifest_counts_and_classes(dataset):
     paths, record = _prepared(dataset)
     mpath = manifest_path(paths, dataset)
     assert sha256_file(mpath) == record["manifest"]["sha256"]
@@ -53,6 +53,17 @@ def test_manifest_counts_and_file_hashes(dataset):
         expected_per_class=PER_CLASS[dataset],
         require_all_classes_in=SPLITS,
     )
+
+
+@pytest.mark.parametrize("dataset", DATASETS)
+def test_image_files_match_their_manifest_hashes(dataset):
+    paths, _ = _prepared(dataset)
+    rows = read_manifest(manifest_path(paths, dataset), splits=SPLITS)
+    if not (paths.data_root / rows[0].relative_path).is_file():
+        pytest.skip(
+            f"{dataset} images are not on this machine (data/raw is never tracked); "
+            "the manifest checks above still ran"
+        )
     verify_files(rows, paths.data_root)
 
 

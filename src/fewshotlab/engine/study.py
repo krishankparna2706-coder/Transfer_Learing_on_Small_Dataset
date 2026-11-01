@@ -44,6 +44,7 @@ STUDY_KEYS = {
     "methods",
     "support_seeds",
     "device",
+    "demo",
 }
 STUDY_CATEGORIES = ("mvp", "core", "development", "fixture")
 
@@ -80,6 +81,16 @@ def load_study(path: str | Path) -> dict[str, Any]:
     bad_methods = sorted(set(data["methods"]) - set(METHODS))
     if bad_methods:
         raise ConfigError(f"{path}: unknown methods {bad_methods}")
+    if "demo" in data:
+        demo = data["demo"]
+        if not isinstance(demo, dict) or set(demo) != {"dataset", "k", "seed"}:
+            raise ConfigError(f"{path}: demo must be a mapping with exactly dataset, k and seed")
+        if (
+            demo["dataset"] not in data["datasets"]
+            or demo["k"] not in data["shots"]
+            or demo["seed"] not in data["support_seeds"]
+        ):
+            raise ConfigError(f"{path}: the demo cell {demo} is not part of the study")
     return data
 
 

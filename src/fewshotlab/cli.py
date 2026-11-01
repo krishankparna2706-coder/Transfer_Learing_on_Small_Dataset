@@ -141,6 +141,40 @@ def _run_train(args: argparse.Namespace) -> int:
 
 
 def _run_evaluate(args: argparse.Namespace) -> int:
+    from fewshotlab.paths import get_paths
+
+    if args.split == "test":
+        if args.study is None:
+            from fewshotlab.engine.gate import require_sealed_plan
+
+            require_sealed_plan(get_paths())
+        from fewshotlab.engine.study import load_study
+        from fewshotlab.engine.test_eval import run_test_evaluation
+
+        result = run_test_evaluation(
+            load_study(args.study),
+            get_paths(),
+            device_override=args.device,
+            only_runs={args.run} if args.run else None,
+        )
+        evaluated = sum(r["outcome"] == "evaluated" for r in result["runs"])
+        print(
+            f"HELD-OUT TEST evaluation under seal {result['audit_token']} on {result['device']}: "
+            f"{evaluated} run(s) evaluated now, {len(result['runs']) - evaluated} already recorded"
+        )
+        if result["robustness"]:
+            print(
+                f"  robustness study on {result['robustness']['run_id']}: "
+                f"{result['robustness']['outcome']}"
+            )
+        print("  tables: `report --study PATH` regenerates them from the stored predictions")
+        return ExitCode.OK
+    if args.run is None or args.study is not None:
+        print(
+            "fewshotlab evaluate: --split val needs --run RUN_ID (--study is for --split test)",
+            file=sys.stderr,
+        )
+        return ExitCode.USAGE
     from fewshotlab.engine.runner import evaluate_run
 
     verification = evaluate_run(args.run, args.split, device_override=args.device)
@@ -152,6 +186,58 @@ def _run_evaluate(args: argparse.Namespace) -> int:
         f"{verification['recomputed_macro_f1']:.6f}"
     )
     return ExitCode.OK if verification["identical_predictions"] else ExitCode.FAILURE
+
+
+def _run_lock_test(args: argparse.Namespace) -> int:
+    from fewshotlab.engine import seal as sealing
+    from fewshotlab.engine.study import load_study
+    from fewshotlab.paths import get_paths, portable_path
+
+    paths = get_paths()
+    study = load_study(args.plan)
+    if args.dry_run:
+        doc = sealing.preview(
+            study, paths, reproduce=not args.skip_reproduction, device=args.device
+        )
+        content = doc["content"]
+        print("SEAL PREVIEW: nothing is sealed and the test split stays locked")
+        print(
+            f"  {doc['study_id']}: {content['logical_slots']} logical slots, "
+            f"{len(content['runs'])} sealable runs, {len(content['duplicates'])} deterministic "
+            f"duplicates, {len(content['missing'])} not ready"
+        )
+        if content["demo"]:
+            chosen = content["demo"]["selected"]
+            threshold = content["demo"]["threshold"]["selected"]
+            print(
+                f"  demo checkpoint: {chosen['method']} ({chosen['run_id']}), validation "
+                f"macro-F1 {chosen['val_macro_f1']:.4f}; review threshold "
+                f"{threshold['threshold']:.2f} (validation coverage {threshold['coverage']:.3f})"
+            )
+        check = doc["validation_reproduction"]
+        if check:
+            print(
+                f"  validation reproduction: {check['runs']} runs, all identical "
+                f"{check['all_identical']}, max |score diff| {check['max_abs_score_difference']}"
+            )
+        for problem in doc["blocking"]:
+            print(f"  BLOCKING: {problem}")
+        print(
+            f"  ready to seal: {doc['ready_to_seal']}; preview written to "
+            f"{portable_path(sealing.seal_dir(paths, study['study_id']) / sealing.SEAL_PREVIEW)}"
+        )
+        return ExitCode.OK if doc["ready_to_seal"] else ExitCode.BLOCKED
+    plan = sealing.seal(study, paths, allow_partial=args.allow_partial, device=args.device)
+    print(
+        f"SEALED {plan['study_id']}{' (PARTIAL benchmark)' if plan['partial'] else ''}: "
+        f"{len(plan['content']['runs'])} runs; audit token {plan['audit_token']}; plan sha256 "
+        f"{plan['plan_sha256']}"
+    )
+    print(
+        f"  plan: {portable_path(sealing.seal_dir(paths, plan['study_id']) / sealing.SEALED_PLAN)}"
+    )
+    print(f"  next: evaluate --split test --study {args.plan}")
+    return ExitCode.OK
 
 
 def _run_benchmark(args: argparse.Namespace) -> int:
@@ -224,8 +310,21 @@ def _run_report(args: argparse.Namespace) -> int:
         )
         return ExitCode.OK
     from fewshotlab.engine.study import load_study
+    from fewshotlab.reporting.benchmark_report import (
+        write_aggregate_report,
+        write_robustness_report,
+    )
 
-    report = build_study_report(load_study(args.study), paths, out_root)
+    study = load_study(args.study)
+    report = build_study_report(study, paths, out_root)
+    aggregate = write_aggregate_report(study, paths, out_root, "val")
+    print(f"validation aggregates: {aggregate['out'] / 'aggregate_val.md'}")
+    test = write_aggregate_report(study, paths, out_root, "test")
+    if test["written"]:
+        print(f"held-out test aggregates (sealed): {test['out'] / 'aggregate_test.md'}")
+        stress = write_robustness_report(study, paths, out_root)
+        if stress:
+            print(f"robustness study: {stress['out'] / 'robustness.md'} ({stress['status']})")
     print("VALIDATION ONLY (development results; not held-out test results)")
     for row in report["rows"]:
         value = "null" if row["macro_f1"] is None else f"{row['macro_f1']:.4f}"
@@ -424,8 +523,17 @@ def build_parser() -> argparse.ArgumentParser:
         "Evaluate a stored run on validation, or on test only through the sealed gate.",
         _run_evaluate,
     )
-    p.add_argument("--run", required=True, metavar="RUN_ID")
+    p.add_argument(
+        "--run",
+        metavar="RUN_ID",
+        help="the run to re-evaluate on validation; with --split test, one sealed run only",
+    )
     p.add_argument("--split", required=True, choices=SPLIT_CHOICES)
+    p.add_argument(
+        "--study",
+        metavar="PATH",
+        help="sealed study config (required for --split test; see lock-test)",
+    )
     p.add_argument("--device", choices=DEVICE_CHOICES, default=None)
 
     p = _command(
@@ -453,9 +561,25 @@ def build_parser() -> argparse.ArgumentParser:
         "lock-test",
         "lock-test",
         "Seal the evaluation plan and record an audit token before test access.",
-        _not_implemented("lock-test", "P5", "test-gate sealing"),
+        _run_lock_test,
     )
     p.add_argument("--plan", required=True, metavar="PATH", help="full-study plan (YAML)")
+    p.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="write a preview of everything the seal would record; seal nothing",
+    )
+    p.add_argument(
+        "--allow-partial",
+        action="store_true",
+        help="seal a clearly labelled partial benchmark when some planned runs are missing",
+    )
+    p.add_argument(
+        "--skip-reproduction",
+        action="store_true",
+        help="dry run only: skip re-scoring every run's validation set",
+    )
+    p.add_argument("--device", choices=DEVICE_CHOICES, default=None)
 
     p = _command(
         sub,

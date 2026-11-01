@@ -9,17 +9,36 @@ import pytest
 
 from helpers import REPO_ROOT
 
-TEST_SPLIT_OUTPUTS = ("test_metrics.json", "predictions_test.csv")
+
+def test_test_split_outputs_exist_only_under_an_intact_seal(monkeypatch):
+    """Before the seal no test output may exist; after it, each must be recorded by the seal."""
+    from fewshotlab.engine.seal import audit_test_outputs
+    from fewshotlab.paths import get_paths
+
+    for name in (
+        "FEWSHOTLAB_DATA_ROOT",
+        "FEWSHOTLAB_MANIFESTS_DIR",
+        "FEWSHOTLAB_RUNS_DIR",
+        "FEWSHOTLAB_REPORTS_DIR",
+        "FEWSHOTLAB_CACHE_DIR",
+        "FEWSHOTLAB_DEMO_ASSETS_DIR",
+    ):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv("FEWSHOTLAB_PROJECT_ROOT", str(REPO_ROOT))
+    assert audit_test_outputs(get_paths()) == []
 
 
-def test_no_test_split_outputs_exist_before_the_gate():
-    hits = [
-        path
-        for folder in ("runs", "reports", "demo_assets")
-        for path in (REPO_ROOT / folder).rglob("*")
-        if path.name in TEST_SPLIT_OUTPUTS
-    ]
-    assert hits == [], f"test-split outputs found before the sealed P5 gate: {hits}"
+def test_training_code_cannot_reach_test_images_or_corruptions():
+    """Static check: the training path never imports the test gate or the simulation package."""
+    import ast
+
+    source_root = REPO_ROOT / "src" / "fewshotlab"
+    for module in ("engine/trainer.py", "engine/runner.py", "engine/study.py", "data/datasets.py"):
+        tree = ast.parse((source_root / module).read_text(encoding="utf-8"))
+        imported = {n.module for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
+        imported |= {a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
+        assert "fewshotlab.engine.test_eval" not in imported, module
+        assert not [m for m in imported if m and m.startswith("fewshotlab.simulation")], module
 
 
 def test_large_and_private_inputs_are_ignored():

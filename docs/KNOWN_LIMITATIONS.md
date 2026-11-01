@@ -24,6 +24,20 @@ This list states what FewShotLab cannot claim. It is updated as phases add evide
   principle exploit text. This is not systematically audited.
 - **Scores are uncalibrated model scores**, not probabilities that a prediction is correct. A
   low-score review rule is not out-of-distribution detection.
+- **Full-matrix validation numbers are optimistic too.** Each learned checkpoint was selected on
+  the same validation images. Only the sealed test evaluation is a held-out measurement.
+- **The corruptions are controlled synthetic stress tests**: global brightness, Gaussian blur and
+  Gaussian noise at two levels each. They do not model real production variation (uneven
+  lighting, motion blur, compression, dust, new defect appearances). The mandatory robustness study
+  covers only the sealed demo checkpoint. Wider robustness comparisons would need their own
+  preregistered protocol.
+- **The review threshold is a workflow setting** chosen for 80 % validation coverage. Its test
+  coverage and accepted error are measurements of this stored data set only, not a safety or
+  false-accept guarantee. NEU has no normal class, so false accepts on defect-free material are
+  not measured at all.
+- **The test lock is a process control**, not cryptographic isolation. Test images are readable
+  on disk. The seal, the evaluation ledger and the guardrail tests make test access explicit,
+  one-time and auditable; they do not make it impossible.
 
 ## Reproducibility
 

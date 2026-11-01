@@ -133,12 +133,20 @@ class ImageTransform:
         return self.spec.transform_id
 
     def __call__(self, image: Image.Image, rng: np.random.Generator | None = None) -> torch.Tensor:
+        return self.apply_tensor(pil_to_tensor01(image), rng)
+
+    def apply_tensor(self, x: torch.Tensor, rng: np.random.Generator | None = None) -> torch.Tensor:
+        """The contract on an already-decoded (3, H, W) float tensor in [0, 1].
+
+        ``__call__`` and the corruption study both go through this one code path.
+        """
         spec = self.spec
         if spec.stage == "train" and rng is None:
             raise ValueError("training transforms need an explicit random generator")
         if spec.stage == "eval" and rng is not None:
             raise ValueError("evaluation transforms are deterministic; do not pass a generator")
-        x = pil_to_tensor01(image)
+        if x.ndim != 3 or x.shape[0] != 3:
+            raise ValueError(f"expected a (3, H, W) tensor, got {tuple(x.shape)}")
         mode = InterpolationMode.BILINEAR
         size = [spec.output_size, spec.output_size]
         if spec.random_resized_crop is not None:

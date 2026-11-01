@@ -214,21 +214,41 @@ Rules:
 
 ## 11. Test gate
 
-The test split is locked.
+The test split is locked. Implemented in P5 (`fewshotlab.engine.seal`, `fewshotlab.engine.test_eval`).
 
 **Before test access**
 1. Finish the data audit, the tests and validation-only development.
-2. Seal a plan recording:
-   - the protocol version, code commit and environment lock hash;
-   - split and support hashes, and selected artifact hashes;
-   - metric definitions and corruption settings;
-   - the demo checkpoint, threshold and replay order;
-   - the report rules.
-3. Run `lock-test --plan`. It stores the plan checksum, the time and an audit token in the
-   evaluation ledger.
+2. Preview with `lock-test --plan PATH --dry-run`. It writes `reports/<study>/seal_preview.json`,
+   seals nothing and lists anything that blocks sealing.
+3. Seal with `lock-test --plan PATH`. Sealing refuses unless:
+   - every planned slot is COMPLETED with verified evidence (a partial benchmark needs
+     `--allow-partial` and is labelled partial);
+   - the code tree is clean;
+   - no test-split output exists yet;
+   - the current code re-scores every sealed run's validation set with exactly the stored
+     predictions.
+4. The sealed plan (`reports/<study>/sealed_plan.json`) records:
+   - the code digest (src/, configs/, lock files), protocol-module hashes, library versions and
+     the evaluation device;
+   - split-manifest, class-map and support hashes, and the expected test IDs (count and hash);
+   - per run: attempt, checkpoint or prototype hash, model-spec, validation-prediction and
+     validation-metric hashes, and the training commit;
+   - pretrained-weight hashes, metric definitions, the review scorer, calibration (none) and the
+     corruption protocol;
+   - the demo checkpoint and threshold, the replay manifest hash, the test plan and the report rules.
+5. Its SHA-256 and a random audit token go to `reports/<study>/evaluation_ledger.jsonl` and the
+   run ledger.
+
+**Test access** (`evaluate --split test --study PATH`)
+- Every access first re-derives the plan from the current files. Any difference (a changed
+  support, checkpoint, scorer, threshold, corruption protocol, test ID list, code or environment)
+  refuses access before any test image is read.
+- Each sealed run is evaluated once on its dataset's full test split. `predictions_test.csv` and
+  `test_metrics.json` go into the run's attempt folder, and the file hashes go into the evaluation
+  ledger. A recorded evaluation is never repeated, and an unrecorded test file blocks evaluation.
+- Test aggregates are written only for runs with recorded, hash-matching evaluations.
 
 **After sealing**
-- Every prespecified model is evaluated once.
 - Changing any sealed item invalidates the seal.
 - A scientific correction after test access marks the affected results INVALIDATED (history is
   kept) and reruns them under a new version.
@@ -238,28 +258,39 @@ The gate is a process control, not cryptographic isolation.
 
 ## 12. Industrial replay and corruptions
 
-This applies in P5 and P7. It is protocol only; nothing has been run.
+Implemented in P5 (`fewshotlab.simulation`). Nothing has been run on test yet.
 
 - **Demo checkpoint:** among the NEU K=10, seed 11 runs of the four methods, the one with the
-  highest validation macro-F1. Exact ties go to the lexically first method name. It is chosen
-  and sealed before test access.
+  highest validation macro-F1. Exact ties go to the lexically first method name. All four
+  candidates must be COMPLETED and verified. It is chosen and sealed before test access.
 - **Review threshold:**
   - Candidate values: {0, 0.05, …, 1}.
+  - Score: the maximum class score (softmax of logits; softmax of −d² for prototypes).
+    It is uncalibrated.
   - Coverage = the fraction of validation predictions with max score ≥ threshold.
   - Pick the highest threshold that keeps ≥ 80 % coverage on that model's validation predictions.
-  - Scores strictly below the threshold are flagged for review.
+  - Scores strictly below the threshold are flagged for review. If nothing is accepted, the
+    accepted-error rate is null.
   - The 80 % is a workflow setting, not a safety target.
-- **Corruptions**, applied to [0,1] pixels before normalization:
+- **Corruptions**, applied to decoded [0,1] pixels at native resolution, before the evaluation
+  resize and normalization:
 
   | Condition | Level 1 | Level 2 | Rule |
   |---|---|---|---|
-  | brightness | ×0.6 | ×1.4 | clipped |
-  | Gaussian blur | σ = 1 px | σ = 2 px | reflect padding, kernel 2·ceil(3σ)+1 |
-  | Gaussian noise | SD 0.03 | SD 0.08 | clipped |
+  | brightness | ×0.6 | ×1.4 | clipped to [0, 1] |
+  | Gaussian blur | σ = 1 px | σ = 2 px | separable kernel, 2·ceil(3σ)+1 taps, reflect padding |
+  | Gaussian noise | SD 0.03 | SD 0.08 | one draw per decoded pixel, clipped to [0, 1] |
 
-  - Seeds come from SHA-256(parent_id, condition, severity, 703).
-  - Clean images and the six conditions are reported separately.
+  - Grayscale images (NEU) are corrupted as one channel, then replicated to RGB.
+  - Noise seeds are the uint64 from SHA-256 of the JSON list [parent_id, condition, severity, 703].
+  - Each derivative records its parameters, seed, implementation and pixel checksum.
+  - Clean images and the six conditions are reported separately. Each derivative is paired with
+    its clean parent and never counted as a new test image.
   - Derivatives inherit the parent's split and are never used for training.
+- **Replay order:** the NEU test IDs are sorted, then permuted once with the generator seeded from
+  ["neu_cls", "replay-order", 703]. The clean stream comes first, then each condition over the
+  same parents in the same order. The order ignores labels; the true class is copied in for
+  demonstration mode. The manifest (`replay_manifest.csv`) is sealed by hash.
 - The replay never labels an image good, safe or defect-free. It classifies known defect types in
   stored images.
 
@@ -271,7 +302,8 @@ This applies in P5 and P7. It is protocol only; nothing has been run.
   - `train_history.csv` (learned methods);
   - `best.ckpt` or `prototypes.npz`;
   - `val_metrics.json`, predictions and plots.
-- `test_metrics.json` and `predictions_test.csv` exist only after the gate.
+- `test_metrics.json` and `predictions_test.csv` exist only after the gate, each recorded in the
+  study's evaluation ledger.
 - Fixture artifacts carry `is_fixture = true` and are rejected by aggregation.
 - The run ID combines protocol, dataset, method, K, seed and a config hash. Nothing is overwritten.
 
