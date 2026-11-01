@@ -277,3 +277,49 @@ Each entry records what was decided, why, and what it implies. Newest entries go
   `best.ckpt`, the inference artifact. FAILED attempts keep theirs, so they can still be resumed.
 - **Exception:** the five P3 diagnostic runs ran before this rule existed and still hold their
   local `last.ckpt` files. Those are gitignored.
+
+## D-036 (2026-11-01): Studies expand to run slots; deterministic duplicates are counted once
+- **Expansion:** a study config (`configs/mvp.yaml`, `configs/full-study.yaml`) expands
+  datasets × K × methods × seeds into run slots. Each slot has the same config hash, and therefore
+  the same run ID, as the equivalent standalone config file, so a job cannot run twice under two
+  names.
+- **Pre-flight checks:**
+  - unique run IDs;
+  - every method at a dataset/K/seed reads the same support manifest;
+  - scratch uses random init, the others IMAGENET1K_V1;
+  - the init seed depends only on train_seed;
+  - one training transform per dataset;
+  - one recipe across the learned slots.
+- **Duplicates:** a prototype slot whose support **membership** (IDs per class, ignoring the seed
+  label) matches an earlier slot is deterministic, so it is marked DEDUPLICATED and counted once.
+  In the full study these are the Flowers K=10 seeds 22–55, giving 160 logical slots and 156
+  unique runs.
+
+## D-037 (2026-11-01): The provenance "dirty" flag covers code, configs and locks only
+- **Context:** runs append to tracked records (`runs/ledger.jsonl`, reports, manifests). Counting
+  those would mark every run after the first as dirty.
+- **Decision:** `provenance.code.dirty` reflects changes under `src/`, `configs/`, `tests/`,
+  `app/` and the lock and project files. Other changed paths are listed separately. The P4 MVP ran
+  from commit `8f3d541` with a clean code tree.
+
+## D-038 (2026-11-01): Validation-report rules
+- **Source and banner:** `report --study` rebuilds every table and chart from the ledger and the
+  stored prediction files, under a "VALIDATION ONLY" banner. The banner states that checkpoints
+  were selected on the same validation images, so the numbers are optimistic and not test results.
+- **Status handling:**
+  - unfinished or deduplicated slots show their status with `null` metrics;
+  - a run whose stored metrics do not regenerate is shown as EVIDENCE_FAILED.
+- **What is committed:** per-run learning-curve and confusion plots contain no dataset images and
+  are copied next to the report.
+- **What stays local:** error galleries (rule fixed in advance: the first 12 misclassified
+  validation images in image_id order) and augmentation grids contain dataset photos. They are
+  gitignored and never published.
+
+## D-016a (2026-11-01): Assisted review of the Flowers near-duplicate candidates
+- **What was done:** while the P4 MVP ran, the 9 cross-split or cross-class pHash candidates were
+  rendered side by side and inspected (Claude; a human still needs to confirm).
+- **Finding:** all 9 appear to be the same photograph, or the same scene with a minimal change.
+  `image_07303` (labeled ball moss) appears to be a foxglove identical to `image_07304`: a probable
+  source label error.
+- **Decision unchanged:** the official split is preserved, and the findings are disclosed (data
+  card).

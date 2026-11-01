@@ -18,6 +18,10 @@ This list states what FewShotLab cannot claim. It is updated as phases add evide
   training randomness (train_seed = support_seed). At Flowers K=10, support variation is zero and
   prototypes produce a single deterministic result.
 - **The recipe is a preregistered starting point**, not tuned to optimality for each method.
+- **P4 MVP numbers are validation-only, single-seed (n = 1) and optimistic**, because checkpoints
+  were selected on the same validation images. They are exploratory, not benchmark results.
+- **Some Flowers images contain visible text** (for example a species caption), so a model could in
+  principle exploit text. This is not systematically audited.
 - **Scores are uncalibrated model scores**, not probabilities that a prediction is correct. A
   low-score review rule is not out-of-distribution detection.
 

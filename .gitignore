@@ -48,3 +48,8 @@ runs/*
 
 # --- Regenerable per-image audit tables (large)
 reports/data_audit/*/image_audit.csv
+
+# --- Local-only review sheets, error galleries and augmentation grids (they contain dataset images)
+reports/data_audit/*/review/
+reports/*/errors/
+reports/*/sanity/*.png

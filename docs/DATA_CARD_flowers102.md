@@ -74,13 +74,31 @@ Its split is **not** the official split, so it was used only for verification
     `image_07015` (val) ~ `image_07040` (test); `image_07029` (val) ~ `image_08080` (test).
   - One pair crosses **classes**: `image_07303` (`label_093`) ~ `image_07304` (`label_094`), both in test,
     at distance 0. This is possible label noise or near-identical photos in the source.
-  - **A human visual review of these candidates is pending (NOT_RUN).**
+  - **Assisted visual review (Claude, 2026-11-01; human confirmation pending).** The 9
+    cross-split or cross-class pairs were rendered side by side into a local, gitignored sheet
+    (`reports/data_audit/flowers102/review/`). Every pair appears to show the same photograph,
+    or the same scene with a slightly different crop:
+
+    | Pair | Splits | Class |
+    |---|---|---|
+    | 01835 ~ 01858 | val ↔ test | lotus |
+    | 01844 ~ 01855 | test ↔ train | lotus |
+    | 01929 ~ 01959 | val ↔ test | lotus |
+    | 05746 ~ 05768 | train ↔ val | king protea |
+    | 07015 ~ 07040 | val ↔ test | siam tulip |
+    | 07029 ~ 08080 | val ↔ test | siam tulip |
+    | 07307 = 07309 | train ↔ test | foxglove |
+    | 08067 = 08077 | test ↔ val | carnation |
+
+    `image_07303` is labeled `label_093` (ball moss), yet it appears to be the same white-foxglove
+    photo as `image_07304` (`label_094`, foxglove), both in test. This is a probable label error
+    in the official dataset.
 - **Group metadata:** none is available.
 
-**Decision (D-016):** the official split is preserved unchanged, as protocol v1 requires. At most a
-handful of the 6,149 test images have a twin or near-twin in train or validation, and this is
-disclosed with every Flowers result. Any deduplicated analysis would be a separately named
-sensitivity protocol.
+**Decision (D-016):** the official split is preserved unchanged, as protocol v1 requires. About
+7 of the 6,149 test images (≈0.1 %) have a twin or near-twin in train or validation, and one test
+image is probably mislabeled. This is disclosed with every Flowers result. Any deduplicated or
+label-corrected analysis would be a separately named sensitivity protocol.
 
 ## Terms and citation
 
@@ -90,6 +108,9 @@ classification over a large number of classes", ICVGIP 2008.
 
 ## Limitations
 
+- Some images carry visible text (watermarks, captions). One support image of `label_002`
+  (hard-leaved pocket orchid) shows the species caption "Paph. micranthum", a potential text
+  shortcut. This was seen during the P4 augmentation check and has not been audited systematically.
 - Flowers102 photos overlap in style with web imagery. Overlap with ImageNet pretraining cannot be
   ruled out.
 - The validation set (1,020 labels) is part of the label budget at every K.

@@ -53,6 +53,10 @@ Generated reproducibly by `fewshotlab.reporting.estimate` from the diagnostic ti
 **Caveat:** small NEU epochs carry fixed per-batch overhead (NEU partial fit costs 6.3 ms per image,
 against 3.2 ms for Flowers).
 
+**Check against a real run (P4):** the 8 MVP jobs took 1,854 s, about 31 minutes, as measured
+by `benchmark`. That is inside the estimated 0.14–0.82 h. The learned runs stopped after 37–86
+epochs.
+
 ## Compute estimate method
 
 1. **Time a representative job.** Run one timed diagnostic job per method and dataset on the

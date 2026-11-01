@@ -82,9 +82,9 @@ All commands run as `python -m fewshotlab <command>`.
 | `weights fetch` | P2 | implemented (explicit download of ResNet18 IMAGENET1K_V1) |
 | `train --config PATH [--device ...] [--allow-download] [--resume]` | P3 | implemented (support + validation only) |
 | `evaluate --run RUN_ID --split {val,test} [--device ...]` | P3 / P5 | `val` re-check implemented; `test` refused until the P5 seal (exit 5) |
-| `benchmark --config PATH [--dry-run]` | P4 / P5 | not implemented yet |
+| `benchmark --config PATH [--dry-run] [--device ...] [--allow-download]` | P4 | implemented (study plan, pre-flight checks, runs unfinished slots) |
 | `lock-test --plan PATH` | P5 | not implemented yet |
-| `report [--ledger PATH] [--out DIR]` | P4 | not implemented yet |
+| `report [--ledger PATH] [--out DIR] [--study PATH]` | P4 | implemented (validation-only comparison from stored predictions) |
 | `demo [--port N]` | P6 | not implemented yet |
 
 Exit codes:

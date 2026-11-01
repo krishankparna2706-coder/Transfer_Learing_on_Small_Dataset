@@ -1,0 +1,106 @@
+{
+  "augmentation": {
+    "detail": "16 augmented views of 4 support images from mvp__fewshotlab-v1__flowers102__scratch__k1__s11__cfg8f124a29 are finite, non-blank and of the contract size; grid saved locally (contains dataset images; not committed)",
+    "status": "PASS"
+  },
+  "runs": [
+    {
+      "checks": {
+        "batchnorm_statistics_updated": true,
+        "every_class_scored": true,
+        "head_updated": true,
+        "labels_match_manifest": true
+      },
+      "k": 1,
+      "method": "scratch",
+      "run_id": "mvp__fewshotlab-v1__flowers102__scratch__k1__s11__cfg8f124a29",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "encoder_unchanged": true,
+        "every_class_scored": true,
+        "head_updated": true,
+        "labels_match_manifest": true
+      },
+      "k": 1,
+      "method": "frozen",
+      "run_id": "mvp__fewshotlab-v1__flowers102__frozen__k1__s11__cfg5c36cc8c",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "every_class_scored": true,
+        "head_updated": true,
+        "labels_match_manifest": true,
+        "no_batchnorm_drift": true,
+        "only_layer4_changed": true
+      },
+      "k": 1,
+      "method": "partial",
+      "run_id": "mvp__fewshotlab-v1__flowers102__partial__k1__s11__cfga97c33c5",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "every_class_scored": true,
+        "labels_match_manifest": true,
+        "prototype_norms_consistent": true,
+        "prototypes_finite": true
+      },
+      "k": 1,
+      "method": "prototypes",
+      "run_id": "mvp__fewshotlab-v1__flowers102__prototypes__k1__s11__cfg2f1baf0f",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "batchnorm_statistics_updated": true,
+        "every_class_scored": true,
+        "head_updated": true,
+        "labels_match_manifest": true
+      },
+      "k": 10,
+      "method": "scratch",
+      "run_id": "mvp__fewshotlab-v1__flowers102__scratch__k10__s11__cfg5a3c0b1a",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "encoder_unchanged": true,
+        "every_class_scored": true,
+        "head_updated": true,
+        "labels_match_manifest": true
+      },
+      "k": 10,
+      "method": "frozen",
+      "run_id": "mvp__fewshotlab-v1__flowers102__frozen__k10__s11__cfg9d773405",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "every_class_scored": true,
+        "head_updated": true,
+        "labels_match_manifest": true,
+        "no_batchnorm_drift": true,
+        "only_layer4_changed": true
+      },
+      "k": 10,
+      "method": "partial",
+      "run_id": "mvp__fewshotlab-v1__flowers102__partial__k10__s11__cfg6c553c7e",
+      "status": "PASS"
+    },
+    {
+      "checks": {
+        "every_class_scored": true,
+        "labels_match_manifest": true,
+        "prototype_norms_consistent": true,
+        "prototypes_finite": true
+      },
+      "k": 10,
+      "method": "prototypes",
+      "run_id": "mvp__fewshotlab-v1__flowers102__prototypes__k10__s11__cfg07e5ae7e",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Study plan: fewshotlab-v1-mvp
 
-8 logical slots, 8 unique runs (0 deterministic duplicates counted once). Category `mvp`. Generated 2026-11-01T15:14:29Z.
+8 logical slots, 8 unique runs (0 deterministic duplicates counted once). Category `mvp`. Generated 2026-11-01T15:48:16Z.
 
 ## Pre-flight checks
 
@@ -15,11 +15,11 @@
 
 | dataset | K | method | seed | status | run ID |
 |---|---:|---|---:|---|---|
-| flowers102 | 1 | scratch | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__scratch__k1__s11__cfg8f124a29` |
-| flowers102 | 1 | frozen | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__frozen__k1__s11__cfg5c36cc8c` |
-| flowers102 | 1 | partial | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__partial__k1__s11__cfga97c33c5` |
-| flowers102 | 1 | prototypes | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__prototypes__k1__s11__cfg2f1baf0f` |
-| flowers102 | 10 | scratch | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__scratch__k10__s11__cfg5a3c0b1a` |
-| flowers102 | 10 | frozen | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__frozen__k10__s11__cfg9d773405` |
-| flowers102 | 10 | partial | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__partial__k10__s11__cfg6c553c7e` |
-| flowers102 | 10 | prototypes | 11 | NOT_RUN | `mvp__fewshotlab-v1__flowers102__prototypes__k10__s11__cfg07e5ae7e` |
+| flowers102 | 1 | scratch | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__scratch__k1__s11__cfg8f124a29` |
+| flowers102 | 1 | frozen | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__frozen__k1__s11__cfg5c36cc8c` |
+| flowers102 | 1 | partial | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__partial__k1__s11__cfga97c33c5` |
+| flowers102 | 1 | prototypes | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__prototypes__k1__s11__cfg2f1baf0f` |
+| flowers102 | 10 | scratch | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__scratch__k10__s11__cfg5a3c0b1a` |
+| flowers102 | 10 | frozen | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__frozen__k10__s11__cfg9d773405` |
+| flowers102 | 10 | partial | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__partial__k10__s11__cfg6c553c7e` |
+| flowers102 | 10 | prototypes | 11 | COMPLETED | `mvp__fewshotlab-v1__flowers102__prototypes__k10__s11__cfg07e5ae7e` |

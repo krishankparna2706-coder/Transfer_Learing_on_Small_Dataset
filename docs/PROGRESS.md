@@ -8,9 +8,9 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0–P3 complete: data tooling, four methods, training engine, evidence capture, test gate (refusing). Benchmark, report, lock-test and demo commands exit 3 (P4–P6) |
+| Implementation | P0–P4 complete. lock-test, test evaluation, demo and the app exit 3 or are refused until P5–P6 |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
-| Benchmark | NOT_RUN. The ledger holds only 5 `diagnostic` runs (2 epochs each, timing only); 0 MVP and 0 core runs |
+| Benchmark | Core matrix NOT_RUN. P4 MVP: 8/8 COMPLETED, **validation only** (n = 1, seed 11; exploratory). Ledger: 6 diagnostic + 8 MVP runs |
 | Demo | NOT_RUN |
 | Remote push | P0 pushed to `origin/main` (`2c1e9b7`) once write access was confirmed |
 
@@ -255,3 +255,79 @@ Example: `runs/diagnostic__fewshotlab-v1__flowers102__partial__k10__s11__cfg506d
 ### Next action (P4, awaiting go-ahead)
 Run the 8 MVP jobs listed in `configs/mvp/`, one `train` command per config. Validation only;
 the test split stays locked.
+
+## P4: validation-only MVP (2026-11-01)
+
+### What changed
+- **Study planning** (`engine/study.py`, D-036): study configs expand to run slots, each with the
+  same run ID as its standalone config; pre-flight integrity checks run first; deterministic
+  prototype duplicates are counted once.
+- **`benchmark --config`** (`--dry-run`, `--device`, `--allow-download`): runs unfinished slots in
+  order, records failures and continues. Finished slots are never re-run.
+- **`report`:**
+  - `--study` builds the validation-only comparison from stored records, with sanity checks and
+    error galleries;
+  - without `--study` it summarizes the ledger.
+- **Report modules:** `reporting/study_report.py`, `reporting/sanity.py`, `reporting/errors.py`
+  (D-038).
+- **Run records:** each run now records trainable and total parameters, total wall time and
+  validation-pass time per image.
+- **Provenance:** the dirty flag covers code, configs and locks only (D-037).
+- **Configs:** `configs/mvp.yaml` (8 jobs), `configs/full-study.yaml` (P5: 160 slots, 156 unique;
+  NOT RUN), and the K=1 batch-flow diagnostic.
+- **Assisted review of the Flowers near-duplicate candidates** (D-016a; a human still needs to
+  confirm).
+
+### Commands executed and observed results
+| Command | Observed |
+|---|---|
+| `benchmark --config configs/mvp.yaml --dry-run` | 8 slots, 8 unique; all 6 pre-flight checks PASS (shared support IDs, unique run IDs, init policy, paired init seed, one training transform, one recipe) |
+| `train --config configs/runs/diagnostic/flowers102-scratch-k1-s11.yaml` | diagnostic COMPLETED in 16.6 s; batches 32/32/32/6 (102 images per epoch, 4 steps); losses finite |
+| `benchmark --config configs/full-study.yaml --dry-run` | 160 logical slots, 156 unique (4 Flowers K=10 prototype duplicates); all checks PASS; NOT RUN |
+| `benchmark --config configs/mvp.yaml` (MPS, commit `8f3d541`, clean code tree) | **8 COMPLETED, 0 failed, 1,854 s** |
+| `report --study configs/mvp.yaml` | comparison regenerated from stored predictions:<br>• 8/8 rows pass the evidence check<br>• sanity checks 8/8 PASS; augmentation check PASS<br>• error galleries written locally |
+| `report` | ledger summary: diagnostic 6 COMPLETED, mvp 8 COMPLETED; 8 verified MVP runs |
+| `uv run pytest -q` | 233 passed. `test_guardrails.py` confirms that no `test_metrics.json` or `predictions_test.csv` exists |
+
+### MVP outcomes
+
+These are **validation only, n = 1, and optimistic because of checkpoint selection**. The full
+table is in [MVP_DECISION_MEMO.md](MVP_DECISION_MEMO.md) and
+`reports/fewshotlab-v1-mvp/comparison.md`.
+
+| Method | K=1 val macro-F1 | K=10 val macro-F1 |
+|---|---:|---:|
+| scratch | 0.073 | 0.477 |
+| frozen | 0.449 | 0.853 |
+| partial | 0.458 | 0.871 |
+| prototypes | 0.415 | 0.780 |
+
+**Decision:** the v1 recipe is retained unchanged for P5.
+
+### P4 evidence table
+
+| Criterion | Status | Evidence | Observed |
+|---|---|---|---|
+| All 8 jobs have explicit statuses; completion requires valid artifact schemas and traceable predictions; failures stay visible | PASS | `reports/fewshotlab-v1-mvp/comparison.md`, `test_p4_report.py` | 8/8 COMPLETED with full artifacts. NOT_RUN and EVIDENCE_FAILED rows stay visible with null metrics (tested) |
+| Every metric regenerates from the stored validation predictions | PASS | `verify_evidence` for each row | all 8 regenerate exactly; prediction-file hashes match |
+| Comparison via the CLI and a report export; no hard-coded numbers | PASS | `benchmark`, `report --study`; CSV/JSON/MD/plot built from records | the test confirms table values equal the stored `val_metrics.json` |
+| Decision memo from validation evidence only | PASS | [MVP_DECISION_MEMO.md](MVP_DECISION_MEMO.md) | recipe retained |
+| Test access stays locked; an automated test confirms no test predictions or metrics | PASS | `test_guardrails.py::test_no_test_split_outputs_exist_before_the_gate`; `evaluate --split test` exits 5 | 0 test-split files |
+| Shared support hash per dataset/K/seed; unique run IDs; init policy; identical training transforms | PASS | pre-flight checks (`plan.md`) | all PASS |
+| Short diagnostic before the full jobs, kept separate | PASS | `diagnostic` ledger category | K=1 batch flow and finite losses verified |
+| Runtime, update counts and trainable parameters reported | PASS | comparison table | wall time, optimizer steps and trainable parameters per run |
+| Learning curves, confusion matrices and a prespecified error sample inspected; mapping, frozen-head, BatchNorm-drift and augmentation checks | PASS | sanity checks, plots, error galleries | no defects found; visible-text overlay noted |
+
+### What the MVP demonstrates
+- The complete path works on real data: data → supports → four methods → validation selection →
+  evidence → report.
+- At seed 11, the three transfer methods far exceed scratch at both K values.
+- More shots (K=10) help every method.
+
+### What remains uncertain
+- Variability across seeds (n = 1).
+- Held-out test performance.
+- Whether the differences among the transfer methods are real.
+- Repeatability of training on MPS.
+
+**Benchmark (core) metrics: all NOT_RUN.**

@@ -16,14 +16,13 @@ DOCUMENTED_FLAGS = {
     ("evaluate",): ["--run", "--split", "--device"],
     ("benchmark",): ["--config", "--dry-run", "--device", "--allow-download"],
     ("lock-test",): ["--plan"],
-    ("report",): ["--ledger", "--out"],
+    ("report",): ["--ledger", "--out", "--study"],
     ("demo",): ["--port"],
 }
 
 # Commands that are still stubs in this phase, with the phase that implements them.
 STUBS = {
     "lock-test": (["lock-test", "--plan", "configs/not-used.yaml"], "P5"),
-    "report": (["report"], "P4"),
     "demo": (["demo"], "P6"),
 }
 

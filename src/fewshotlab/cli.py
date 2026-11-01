@@ -203,6 +203,41 @@ def _run_benchmark(args: argparse.Namespace) -> int:
     return ExitCode.FAILURE if failed else ExitCode.OK
 
 
+def _run_report(args: argparse.Namespace) -> int:
+    import dataclasses
+    from pathlib import Path
+
+    from fewshotlab.paths import get_paths
+    from fewshotlab.reporting.study_report import build_study_report, ledger_summary
+
+    paths = get_paths()
+    ledger = Path(args.ledger).resolve()
+    if ledger != paths.ledger.resolve():
+        paths = dataclasses.replace(paths, runs=ledger.parent)
+    out_root = Path(args.out).resolve()
+    if args.study is None:
+        summary = ledger_summary(paths, out_root)
+        print(f"ledger summary: {summary['status_counts_by_category']}")
+        print(
+            f"verified MVP/core runs: {len(summary['accepted'])}; report: "
+            f"{out_root / 'ledger_summary.md'}"
+        )
+        return ExitCode.OK
+    from fewshotlab.engine.study import load_study
+
+    report = build_study_report(load_study(args.study), paths, out_root)
+    print("VALIDATION ONLY (development results; not held-out test results)")
+    for row in report["rows"]:
+        value = "null" if row["macro_f1"] is None else f"{row['macro_f1']:.4f}"
+        print(
+            f"  {row['dataset']} K={row['k']} {row['method']:<10} {row['status']:<12} "
+            f"val macro-F1 {value}"
+        )
+    failing = [r for r in (report["sanity"] or {}).get("runs", []) if r["status"] != "PASS"]
+    print(f"report: {report['out'] / 'comparison.md'}; sanity failures: {len(failing)}")
+    return ExitCode.FAILURE if failing else ExitCode.OK
+
+
 def _run_weights_fetch(args: argparse.Namespace) -> int:
     from fewshotlab.models.backbone import ensure_imagenet_weights
     from fewshotlab.paths import get_paths
@@ -427,10 +462,17 @@ def build_parser() -> argparse.ArgumentParser:
         "report",
         "report",
         "Generate measured tables and plots from the ledger and stored predictions.",
-        _not_implemented("report", "P4", "measured reports"),
+        _run_report,
     )
     p.add_argument("--ledger", default="runs/ledger.jsonl", metavar="PATH")
     p.add_argument("--out", default="reports", metavar="DIR")
+    p.add_argument(
+        "--study",
+        default=None,
+        metavar="PATH",
+        help="study config (e.g. configs/mvp.yaml): report every planned slot with its "
+        "status; without it, summarize the ledger",
+    )
 
     p = _command(
         sub,
