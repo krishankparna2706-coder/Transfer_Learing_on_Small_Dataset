@@ -2,7 +2,7 @@
 
 > **VALIDATION ONLY: exploratory development results, n = 1 run per cell. Each learned model's checkpoint was selected on these same validation images, so its numbers are optimistic. None of them is a held-out test result, and they are not comparable with published Flowers102 test benchmarks.**
 
-Generated 2026-11-01T18:13:14Z from the run ledger and the stored prediction files. Slot statuses: {'COMPLETED': 8}. Every metric value regenerates from its run's `predictions_val.csv`.
+Generated 2026-11-01T18:20:55Z from the run ledger and the stored prediction files. Slot statuses: {'COMPLETED': 8}. Every metric value regenerates from its run's `predictions_val.csv`.
 
 | Dataset | K | Method | Status | Macro-F1 | Top-1 | Balanced acc. | Top-5 | Selected epoch | Epochs run | Optimizer steps | Trainable params | Fit / val labels | Wall time (s) |
 |---|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|

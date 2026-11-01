@@ -1,9 +1,15 @@
 # runs/
 
-Append-only experiment records (P3 onward). Each run attempt gets its own directory with
-`config.resolved.yaml`, `environment.json`, `provenance.json`, `train_history.csv`, `best.ckpt` or
-`prototypes.npz`, `predictions_val.csv`, `val_metrics.json` and plots. `test_metrics.json` and
-`predictions_test.csv` can only appear after the sealed P5 test gate.
+Append-only experiment records.
 
-Only this README and `ledger.jsonl` are tracked in git; checkpoints and predictions stay local.
-The ledger starts empty: no run has been executed, and the benchmark status is NOT_RUN.
+- `ledger.jsonl` (tracked in git): one event per status change or verification for every run
+  attempt.
+- `artifacts/<run_id>/<attempt_id>/` (never tracked): each attempt's evidence.
+  - `config.resolved.yaml`, `environment.json`, `provenance.json`, `model_spec.json`
+  - `train_history.csv`, `best.ckpt` or `prototypes.npz`
+  - `predictions_val.csv`, `val_metrics.json`, plots
+  - `test_metrics.json` and `predictions_test.csv` can only appear after the sealed P5 test gate.
+
+On this machine `artifacts/` is a symlink to `~/.local/share/fewshotlab/runs`, so the gigabytes of
+checkpoints stay out of iCloud Drive (decision D-039). On any other machine it is an ordinary
+folder, created on first use.

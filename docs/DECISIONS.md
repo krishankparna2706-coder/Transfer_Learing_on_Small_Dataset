@@ -323,3 +323,16 @@ Each entry records what was decided, why, and what it implies. Newest entries go
   source label error.
 - **Decision unchanged:** the official split is preserved, and the findings are disclosed (data
   card).
+
+## D-039 (2026-11-01): Run artifacts live under `runs/artifacts/`, outside iCloud on this machine
+- **Context:** the core matrix adds about 5–6 GB of checkpoints, and the project folder syncs to
+  iCloud Drive. The user chose to keep run artifacts off iCloud.
+- **Decision:**
+  - Run folders now resolve to `runs/artifacts/<run_id>/<attempt_id>`.
+  - On this Mac, `runs/artifacts` is a symlink to `~/.local/share/fewshotlab/runs` (local disk,
+    not synced). Elsewhere it is a normal folder.
+  - The ledger and reports stay in the project and in git.
+- **Migration:** the 14 earlier runs (6 diagnostic, 8 MVP) were moved there unchanged. The MVP
+  report regenerated with identical values afterwards.
+- **Note:** ledger events written before this change record `run_dir` as `runs/<run_id>/<attempt>`;
+  `run_root()` is authoritative. New events record `runs/artifacts/<run_id>/<attempt>`.

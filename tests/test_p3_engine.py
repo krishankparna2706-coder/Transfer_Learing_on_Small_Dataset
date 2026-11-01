@@ -176,7 +176,7 @@ def test_non_finite_loss_marks_the_run_failed(paths, monkeypatch):
         run_training(fixture_config(paths, "scratch", max_epochs=4), paths=paths)
     (event,) = latest_status(paths).values()
     assert event["status"] == "FAILED" and "NonFiniteError" in event["reason"]
-    adir = paths.runs / event["run_id"] / event["attempt_id"]
+    adir = artifacts.run_root(paths, event["run_id"]) / event["attempt_id"]
     assert read_json(adir / "status.json")["failure"]["type"] == "NonFiniteError"
     assert not (adir / "val_metrics.json").exists()
 

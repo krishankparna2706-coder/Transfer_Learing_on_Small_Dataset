@@ -15,7 +15,7 @@ from fewshotlab.config import RunConfig
 from fewshotlab.errors import DataValidationError
 from fewshotlab.hashing import sha256_bytes
 from fewshotlab.io_utils import atomic_write_bytes, atomic_write_json, read_json, utc_now
-from fewshotlab.paths import ProjectPaths
+from fewshotlab.paths import ProjectPaths, portable_path
 from fewshotlab.status import RunStatus, check_transition
 
 PREDICTION_COLUMNS = (
@@ -40,8 +40,18 @@ def make_run_id(cfg: RunConfig, config_sha256: str) -> str:
     return core if cfg.category == "core" else f"{cfg.category}__{core}"
 
 
+#: Run folders live under runs/artifacts/. On a machine where the project folder is cloud-synced,
+#: runs/artifacts may be a symlink to local storage (decision D-039); elsewhere it is a folder.
+ARTIFACTS_DIRNAME = "artifacts"
+
+
 def run_root(paths: ProjectPaths, run_id: str) -> Path:
-    return paths.runs / run_id
+    return paths.runs / ARTIFACTS_DIRNAME / run_id
+
+
+def logical_run_dir(paths: ProjectPaths, run_id: str, attempt_id: str) -> str:
+    """The in-project path recorded in the ledger (symlinks are not resolved)."""
+    return f"{portable_path(paths.runs)}/{ARTIFACTS_DIRNAME}/{run_id}/{attempt_id}"
 
 
 def attempt_dirs(paths: ProjectPaths, run_id: str) -> list[Path]:

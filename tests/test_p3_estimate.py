@@ -12,7 +12,9 @@ from fewshotlab.reporting.estimate import estimate, write_estimate
 
 def _record(paths, dataset, method, support, val, timing):
     run_id = f"diagnostic__synthetic__{dataset}__{method}"
-    attempt = paths.runs / run_id / "a001"
+    from fewshotlab.engine import artifacts
+
+    attempt = artifacts.run_root(paths, run_id) / "a001"
     attempt.mkdir(parents=True)
     atomic_write_json(
         attempt / "val_metrics.json",

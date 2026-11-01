@@ -294,7 +294,7 @@ def run_training(
         "category": cfg.category,
         "is_fixture": cfg.is_fixture,
         "config_sha256": cfg_sha,
-        "run_dir": portable_path(adir),
+        "run_dir": artifacts.logical_run_dir(paths, run_id, attempt_id),
     }
     artifacts.write_status(
         adir,
