@@ -72,3 +72,21 @@ This list states what FewShotLab cannot claim. It is updated as phases add evide
   and caches inside the project still sync, and may be evicted to the cloud by macOS storage
   optimization.
 - No license has been chosen for the code yet.
+
+## Demonstration app (P6)
+
+- **Out-of-scope inputs:** an upload of anything outside a model's learned classes still gets a
+  score for every class. A high score is not evidence that the image belongs to a known class,
+  and the review threshold is not reliable out-of-distribution detection.
+- **Scores:** model scores are uncalibrated. No accuracy is shown for uploads.
+- **Replay (P6):** the replay shows the stored sealed predictions. Live inference with measured
+  latency on the replay arrives in P7.
+- **Latency:** the latency on the prediction page is one call, on the chosen device. The first
+  call on a device includes one-time warm-up. It is not a benchmarked throughput figure.
+- **Startup:** the app's first page load regenerates every metric from the stored predictions
+  (about 17 s for the 156-run study on this Mac); later pages are cached.
+- **Flowers names:** Flowers class names come from a secondary source (display only); the
+  identity is the class ID and `label_NNN`.
+- **Access:** the app is a local, single-user tool on 127.0.0.1, with no sign-in. Charts are
+  designed for the configured light theme; switching Streamlit to dark at runtime lowers their
+  contrast.

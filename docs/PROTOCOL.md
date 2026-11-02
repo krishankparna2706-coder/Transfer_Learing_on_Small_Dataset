@@ -297,6 +297,15 @@ Implemented in P5 (`fewshotlab.simulation`). The sealed robustness study ran onc
   demonstration mode. The manifest (`replay_manifest.csv`) is sealed by hash.
 - The replay never labels an image good, safe or defect-free. It classifies known defect types in
   stored images.
+- **Displaying the replay after the sealed evaluation (P6, D-052):**
+  - **Verification first:** the app plays back the stored sealed predictions only after
+    `load_sealed_replay` verifies their identities (sealed plan, replay-relevant protocol
+    modules, corruption protocol, test IDs, class map, demo checkpoint, replay manifest and the
+    recorded robustness files).
+  - **Pixels:** each displayed derivative must reproduce its sealed checksum.
+  - **Labels:** true labels appear only when the presenter reveals them, and every count shows
+    its denominator.
+  - **Nothing new:** no new selection, threshold or metric comes from this view.
 
 ## 13. Run records and statuses
 

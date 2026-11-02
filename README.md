@@ -87,7 +87,8 @@ All commands run as `python -m fewshotlab <command>`.
 | `benchmark --config PATH [--dry-run] [--device ...] [--allow-download]` | P4 | implemented (study plan, pre-flight checks, runs unfinished slots) |
 | `lock-test --plan PATH [--dry-run] [--skip-reproduction] [--allow-partial] [--device ...]` | P5 | implemented (`--dry-run` previews the seal and seals nothing) |
 | `report [--ledger PATH] [--out DIR] [--study PATH]` | P4 / P5 | implemented (validation comparison and seed aggregates; test tables only after a sealed evaluation) |
-| `demo [--port N]` | P6 | not implemented yet |
+| `predict --run RUN_ID --image PATH [--image PATH ...] [--attempt ID] [--top-k N] [--device ...] [--json]` | P6 | implemented (live prediction with one verified stored run: model scores, never a benchmark result; the app uses the same code) |
+| `demo [--port N] [--host ADDR] [--study PATH] [--check]` | P6 | implemented (offline Streamlit app on 127.0.0.1; `--check` verifies offline that it can start) |
 
 Exit codes:
 - 0: success
@@ -99,6 +100,39 @@ Exit codes:
 
 Nothing is downloaded implicitly. Datasets and pretrained weights are fetched only when a command
 is given `--allow-download`.
+
+## Demonstration app
+
+```bash
+python -m fewshotlab demo --check
+```
+
+```bash
+python -m fewshotlab demo
+```
+
+The first command checks offline, on the CPU, that the app can start. The second serves it on
+http://127.0.0.1:8501 for this machine only. It needs no network once the environment is
+installed; prototype models also need the cached ImageNet weights (`weights fetch`, once).
+
+**Pages:**
+- **Overview:** the question, the path from images to evidence, the evidence status and the
+  headline held-out test table.
+- **Data and label budget:** split counts and provenance, the label budget for every K, and the
+  real support images behind each run.
+- **Experiment explorer:** method / K / seed filters, mean ± SD charts, every seed, paired
+  differences and every slot's status, for validation or the sealed held-out test.
+- **Single image prediction:** a verified stored model scores an uploaded or a validation image.
+  The scores are labeled model scores, and for a validation image the page shows its match with
+  the stored prediction.
+- **Industrial replay:** the sealed NEU stream, clean or stressed, with the sealed threshold's
+  review decision. It is verified against the seal before any image is shown.
+- **Reproducibility:** the seal, protocol-module hashes, environment, data and weights hashes,
+  commands, artifacts, error galleries and limitations.
+
+**Result labels:** every number carries one of VALIDATION, HELD-OUT TEST or LIVE PREDICTION.
+Nothing in the app trains a model or changes a dataset. Uploaded images stay in memory for the
+session and are never saved or logged.
 
 ## Repository layout
 

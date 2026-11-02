@@ -347,6 +347,66 @@ def _run_weights_fetch(args: argparse.Namespace) -> int:
     return ExitCode.OK
 
 
+def _run_predict(args: argparse.Namespace) -> int:
+    import json
+    from pathlib import Path
+
+    from fewshotlab.devices import resolve_device
+    from fewshotlab.engine import predict
+    from fewshotlab.errors import ConfigError
+    from fewshotlab.paths import get_paths
+
+    if args.top_k < 1:
+        raise ConfigError("--top-k must be at least 1")
+    paths = get_paths()
+    images = []
+    for name in args.image:
+        try:
+            data = Path(name).read_bytes()
+        except OSError as exc:
+            raise predict.UploadRejected(f"{name}: cannot read the file ({exc.strerror})") from exc
+        try:
+            images.append(predict.decode_upload(data))
+        except predict.UploadRejected as exc:
+            raise predict.UploadRejected(f"{name}: {exc}") from exc
+    ref = predict.model_ref(paths, args.run, args.attempt)
+    model = predict.load_model(paths, ref, resolve_device(args.device))
+    results = predict.predict_images(model, images, top_k=args.top_k)
+    if args.json:
+        rows = [{"image": n, **r.to_json()} for n, r in zip(args.image, results, strict=True)]
+        print(json.dumps(rows, indent=2))
+        return ExitCode.OK
+    print("LIVE PREDICTION: model scores, not calibrated probabilities; not a benchmark result")
+    fixture = " [SOFTWARE FIXTURE]" if ref.is_fixture else ""
+    print(f"model: {ref.run_id}/{ref.attempt_id} ({ref.label}) on {model.device}{fixture}")
+    for name, result in zip(args.image, results, strict=True):
+        print(name)
+        for rank, (class_id, class_name, score) in enumerate(result.top, start=1):
+            print(f"  {rank}. {class_name} (class {class_id})  {predict.SCORE_LABEL} {score:.6f}")
+    print(
+        f"preprocessing {results[0].preprocess_ms:.1f} ms, inference {results[0].inference_ms:.1f}"
+        f" ms for {len(results)} image(s)"
+    )
+    print("An image outside the learned classes still receives a score for every learned class.")
+    return ExitCode.OK
+
+
+def _run_demo(args: argparse.Namespace) -> int:
+    from fewshotlab import app_launch
+    from fewshotlab.paths import get_paths
+
+    paths = get_paths()
+    study = app_launch.study_file(paths, args.study)
+    if args.check:
+        result = app_launch.startup_check(paths, study)
+        for check in result["checks"]:
+            print(f"  {check['status']:<4}  {check['check']}: {check['detail']}")
+        verdict = "ready" if result["ok"] else "NOT READY (see FAIL lines)"
+        print(f"demo startup check for {result['study']}: {verdict}")
+        return ExitCode.OK if result["ok"] else ExitCode.BLOCKED
+    return app_launch.launch(paths, study=study, host=args.host, port=args.port)
+
+
 def _command(
     sub: argparse._SubParsersAction, name: str, label: str, help_text: str, handler: Handler
 ) -> argparse.ArgumentParser:
@@ -600,12 +660,55 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = _command(
         sub,
+        "predict",
+        "predict",
+        "Score image files with one stored run. This is a live prediction (model scores, not "
+        "calibrated probabilities), never a benchmark result; the app uses the same code.",
+        _run_predict,
+    )
+    p.add_argument("--run", required=True, metavar="RUN_ID", help="a COMPLETED run ID")
+    p.add_argument(
+        "--attempt",
+        default=None,
+        metavar="ID",
+        help="attempt folder (default: the latest COMPLETED attempt)",
+    )
+    p.add_argument(
+        "--image",
+        required=True,
+        action="append",
+        metavar="PATH",
+        help="image file to score; repeat for several. PNG, JPEG, BMP, TIFF or WebP, at most "
+        "10 MB and 25 million pixels; the content is checked, not the extension",
+    )
+    p.add_argument("--top-k", type=int, default=5, metavar="N", help="classes to list (default 5)")
+    p.add_argument(
+        "--device", choices=DEVICE_CHOICES, default="cpu", help="default cpu, as in the app"
+    )
+    p.add_argument("--json", action="store_true", help="print machine-readable results")
+
+    p = _command(
+        sub,
         "demo",
         "demo",
-        "Launch the offline Streamlit demonstration.",
-        _not_implemented("demo", "P6", "Streamlit demonstration"),
+        "Launch the offline Streamlit demonstration (streamlit run app/streamlit_app.py).",
+        _run_demo,
     )
     p.add_argument("--port", type=int, default=8501)
+    p.add_argument(
+        "--host", default="127.0.0.1", help="interface to serve on (default: this machine only)"
+    )
+    p.add_argument(
+        "--study",
+        default=None,
+        metavar="PATH",
+        help="study config to show (default: configs/full-study.yaml)",
+    )
+    p.add_argument(
+        "--check",
+        action="store_true",
+        help="check offline, on the CPU, that the app can start; serve nothing",
+    )
     return parser
 
 

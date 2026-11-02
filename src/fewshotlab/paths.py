@@ -89,9 +89,20 @@ def get_paths() -> ProjectPaths:
 
 def portable_path(path: str | Path) -> str:
     """A path safe to record in tracked files: relative to the project root when inside it,
-    otherwise only its final component (absolute local paths are never recorded)."""
-    resolved = Path(path).expanduser().resolve()
+    otherwise only its final component (absolute local paths are never recorded).
+
+    The project-relative spelling is tried before symlinks are resolved. A file reached through a
+    link inside the project (``runs/artifacts`` when run folders live on another disk) keeps its
+    project path.
+    """
+    given = Path(os.path.abspath(Path(path).expanduser()))
     try:
-        return resolved.relative_to(find_project_root().resolve()).as_posix()
-    except (ValueError, FewShotLabError):
-        return f"<outside project>/{resolved.name}"
+        root = find_project_root()
+    except FewShotLabError:
+        return f"<outside project>/{given.resolve().name}"
+    for candidate, base in ((given, root), (given.resolve(), root.resolve())):
+        try:
+            return candidate.relative_to(base).as_posix()
+        except ValueError:
+            continue
+    return f"<outside project>/{given.resolve().name}"

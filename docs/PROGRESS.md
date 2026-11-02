@@ -8,10 +8,10 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0–P5 tooling complete. Test access runs only through the sealed workflow (`lock-test`, then `evaluate --split test --study`). `demo` and the app exit 3 until P6 |
+| Implementation | P0–P6 complete. The app (`python -m fewshotlab demo`) and `predict` read only verified records. Test evaluation ended with the sealed run (D-051) |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
 | Benchmark | Core matrix: 156/156 COMPLETED on validation (5 seeds). **Held-out test: 156/156 EVALUATED once** under seal `seal-c6f58862d63b586a0df8dbcf140db0fd` (2026-11-02). Ledger: 6 diagnostic + 8 MVP + 156 core runs |
-| Demo | NOT_RUN (P6). Sealed demo checkpoint: partial, NEU K=10 seed 11, review threshold 0.95. Robustness study on test EVALUATED |
+| Demo | App implemented (P6): six pages. Its replay plays the sealed NEU stream (stored sealed predictions; demo checkpoint partial, NEU K=10 seed 11, threshold 0.95); live inference on the replay and the judge rehearsal are P7 |
 | Remote push | P0–P5 pushed to `origin/main`; each phase is pushed after its commit |
 
 ## P0: foundation (2026-11-01)
@@ -529,6 +529,98 @@ Macro-F1 is shown as mean ± sample SD over distinct runs. Full tables:
   the threshold and the replay manifest.
 - The app and the replay can be served from the stored test predictions, so no further test
   access is planned.
-- Fix the cosmetic `portable_path` label (above).
+- Fix the cosmetic `portable_path` label (above). **Fixed in P6 (D-055).**
 
 **Held-out test metrics: EVALUATED once under seal `seal-c6f58862d63b586a0df8dbcf140db0fd`.**
+
+## P6: demonstration app (2026-11-02)
+
+**State at the end of this entry:**
+- The app, the `predict` command and the `demo` command are implemented.
+- They were checked on the real project in a browser.
+- P7 (live replay inference, judge rehearsal) has not started.
+
+### What changed
+- **Live prediction** (`engine/predict.py`, D-053):
+  - upload validation by content (PNG, JPEG, BMP, TIFF or WebP; one frame; at most 10 MB and
+    25 million pixels; nothing written or logged);
+  - model identification with status, evidence, schema, checkpoint-hash and class-map checks;
+  - prediction through the stored model's own scoring code, with preprocessing and inference
+    timed separately;
+  - comparison with a run's stored validation predictions.
+- **Run registry** (`reporting/run_registry.py`, D-054): the only source of displayed numbers.
+  It wraps the report's `slot_values` and adds the seal summary and dataset facts, cached under a
+  fingerprint of the ledgers and the sealed plan.
+- **Sealed replay view** (`simulation/sealed_replay.py`, D-052): it plays back the stored sealed
+  robustness predictions in the sealed order with the sealed threshold. It is verified by
+  identity, and every displayed derivative is checksum-verified.
+- **Commands:**
+  - `predict` (new) scores image files with one verified run;
+  - `demo` launches the app on 127.0.0.1 (`app_launch.py`);
+  - `demo --check` checks offline, on the CPU, that it can start.
+- **App** (`app/`): Overview, Data and label budget, Experiment explorer, Single image prediction,
+  Industrial replay, Reproducibility.
+  - Every result carries a label: VALIDATION, HELD-OUT TEST, LIVE PREDICTION, NEU HELD-OUT
+    REPLAY or SOFTWARE FIXTURE.
+  - `.streamlit/config.toml`: local only, no usage statistics, 10 MB uploads, light theme.
+- **Fix:** `portable_path` keeps the project spelling through the `runs/artifacts` symlink
+  (D-055).
+- **Tests:**
+  - `tests/test_p6_app.py` (12 tests) and `tests/test_p6_paths.py`;
+  - `tests/test_p0_cli.py` now documents the `predict` and `demo` flags and tests the
+    unfinished-phase exit code directly, since every command now exists.
+
+### Commands executed and observed results
+| Command | Observed |
+|---|---|
+| `python -m fewshotlab demo --check` (real project, CPU, offline) | **ready, every check PASS:**<br>• streamlit 1.66.1, app file, ImageNet weights cached<br>• validation 160 COMPLETED and test 160 EVALUATED slots<br>• Flowers and NEU default models load on CPU and match their stored validation predictions (max score difference 4.5e-13 and 2.1e-10; tolerance 1e-4)<br>• sealed replay verified: 7 streams × 360 images |
+| `python -m fewshotlab predict --run fewshotlab-v1__neu_cls__partial__k10__s11__cfg085b60aa --image .../Cr_1.bmp --top-k 3` | crazing, model score 0.999941 (the stored validation prediction: 0.99994063); 7.0 ms inference on CPU |
+| `predict` with a text file named `fake.png` | refused, exit 1: "the file content is not a readable image" |
+| `python -m fewshotlab demo`, reviewed in the built-in browser at 1440×900 | all six pages render; three chart defects found and fixed (see below) |
+| `ruff check .`, `ruff format --check .`, `pytest -q` | all checks pass; **279 passed**, 0 skipped, 220 s (includes the real-project app smoke test and `demo --check`) |
+
+### Browser review (the app was run)
+Checked at 1440×900 in the built-in browser. Screenshots stayed in the session and were not saved
+to the repository, since some show dataset images.
+- **Defects found and fixed:**
+  - **Chart text unreadable.** The Explorer charts drew their text in the dark-theme ink. The
+    browser reported a dark theme although the app is configured light; the configured theme now
+    wins.
+  - **Legend missing.** One chart layer switched the shared legend off.
+  - **Last panel clipped.** The per-seed panels overflowed and the last one was cut off; each
+    method now gets its own column.
+  - **Text cut off.** Six overview steps in one row broke words, and two labels on the replay
+    page were truncated.
+  - **Flowers names.** Flowers classes showed only `label_NNN`; they now show the display name
+    beside the identity.
+- **Replay:**
+  - playback advanced about one image per second (15 images in about 15 s);
+  - each stressed image appears next to its own clean parent;
+  - the review decision and every count show their denominator, and true labels stay hidden
+    until revealed.
+- **An observed failure:** with Gaussian noise SD 0.08, `neu_cls/PS_7` was predicted crazing at
+  model score 0.766. It went to human review, and its true class is pitted surface. Its clean
+  parent was predicted correctly at 0.999.
+- **Prediction:** the validation image `flowers102/image_06738` gave pink primrose (label_001) at
+  0.9994. It matched the run's stored validation prediction within 1.7e-09; inference took
+  7.9 ms on CPU.
+- **Reproducibility:** all 14 protocol modules still match their sealed hashes.
+
+### P6 evidence table
+
+| Criterion | Status | Evidence | Observed |
+|---|---|---|---|
+| A smoke journey loads the app, selects each core method, renders real or explicitly fixture-labeled outputs and shows provenance | PASS | `test_p6_app.py`: every page on a sealed fixture and on the real project, each method on the prediction page; browser review | fixture pages carry the SOFTWARE FIXTURE label; each method's run ID and its stored-prediction match are shown; the seal token is on Reproducibility |
+| Changing dataset or K cannot leave an incompatible cached model active | PASS | models cached by run, attempt, checkpoint hash and device; a prediction is tied to the same plus the image (D-054); class-map check in `model_ref` | a model whose class map differs is refused (test) |
+| Invalid uploads, missing checkpoints, empty filters and unavailable hardware do not crash | PASS | upload, identity, empty-filter and empty-project tests; device errors are caught on the page | actionable messages, no stack traces |
+| Readable labels, units, legend, statuses, contrast and no clipped charts on the judging display | PASS after fixes | browser review at 1440×900; palette checked with the validator (light and dark adjacent-pair checks PASS; per-seed points use small multiples, since the all-pairs check fails for 4 series) | three chart defects found and fixed |
+| App and CLI predictions match for the same input, model and preprocessing within the declared tolerance | PASS | `test_live_predictions_match_stored_validation_and_the_cli`; `demo --check`; the page's own check | fixture: bit-identical for the same batch on CPU; real project: 4.5e-13 and 2.1e-10 against the MPS-made stored predictions (tolerance 1e-4) |
+| Offline startup with cached approved assets; prerequisites documented | PASS | `demo --check` (no network); README "Demonstration app" | needs the uv environment, prepared data and run folders; ImageNet weights only for prototype models |
+| Numbers come only from the registry; NOT RUN for missing values; no substitutes | PASS | `run_registry`; empty-project test | every page of an empty project shows NOT RUN |
+| Uploads: size and pixel limits, content check, no temporary files, no logging, no user model files | PASS | `decode_upload` tests; uploads stay in memory; models load only from the registry | |
+| The app never trains, seals or evaluates the test split | PASS | AST guard test; file-hash snapshots around the app tests | no file under runs/, reports/ or data/ changes |
+
+### Next action (P7, awaiting go-ahead)
+- Live inference with measured latency on the replay, timed separately from playback.
+- The seven-minute judge script and a rehearsal checklist.
+- A fixed error gallery, using the observed failure above, and an offline package.

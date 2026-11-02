@@ -454,3 +454,66 @@ Each entry records what was decided, why, and what it implies. Newest entries go
   file hashes are kept. Reports regenerate the tables from the stored, hash-checked predictions.
 - **Corrections:** a correction that changes any test result follows PROTOCOL §11. The affected
   results are marked INVALIDATED, with history kept, and rerun under a new protocol version.
+
+## D-052 (2026-11-02): The sealed replay view is verified by identity
+- **What it is:** after the sealed evaluation, the app plays back the NEU replay
+  (`simulation/sealed_replay.py`):
+  - the sealed demo checkpoint's stored predictions, from the P5 robustness evaluation;
+  - in the sealed order;
+  - under the sealed threshold.
+  It selects, tunes and reports nothing new.
+- **Why identity, not the whole code tree:** the full-tree check (D-051) stops matching as soon
+  as later phases change code. Before any test image is read, the view checks instead that:
+  - the sealed plan is intact, and the replay-relevant protocol modules (image decoding,
+    transforms, corruptions, replay order, review rule) still have their sealed hashes;
+  - the corruption protocol, test-ID list, class map, demo checkpoint and replay manifest match
+    the plan;
+  - the robustness evaluation is recorded once, with every file hash unchanged.
+- **Pixels:** each displayed derivative is regenerated from its parent image and must reproduce
+  its sealed checksum.
+- **Failure:** any difference refuses the view and shows the fallback (the stored aggregates).
+- **P7:** P7 adds live inference with measured latency on top of this verified view.
+
+## D-053 (2026-11-02): Live predictions on supplied images
+- **One code path:** the app and `python -m fewshotlab predict` share `engine/predict.py`. An
+  image is decoded by the datasets' safe decoder, transformed by its model's evaluation
+  transform, and scored by the stored model's own `score` function.
+- **Accepting a file:** the decoded content decides, not the name or extension.
+  - Formats: PNG, JPEG, BMP, TIFF or WebP; one still frame.
+  - Limits: at most 10 MB and 25 million pixels, checked before decoding.
+  - Error messages never repeat the file name or any pixel content.
+  - Uploads stay in memory, are never written, logged or used for training, and no accuracy is
+    computed for them.
+- **Wording:** scores are labeled "model score" (no calibration protocol exists). Every
+  prediction page explains that an image outside the learned classes still receives a score for
+  every class.
+- **Models:** a model loads only after `model_ref` checks:
+  - the run is COMPLETED and passes its evidence check;
+  - the run record and model spec are readable, with a supported schema;
+  - the checkpoint matches its recorded hash, and the sealed hash in a sealed study;
+  - the dataset's class map is the one the model was trained with.
+- **Agreement tolerance:** the same image scored on two devices, or in batches of different size,
+  may differ by floating-point rounding. The declared tolerance is 1e-4 (absolute, per class
+  score). The same batch on the same device is bit-identical.
+- **Device:** CPU is the default.
+
+## D-054 (2026-11-02): The app's registry and caches
+- **Numbers:** every displayed benchmark number comes from `reporting/run_registry.py`, which
+  calls the report's `slot_values` (regenerated from stored prediction files and checked against
+  run records or the sealed evaluation ledger). A missing value is shown as NOT RUN, never zero.
+- **Registry cache:** the registry is cached under a fingerprint of the run ledger, the
+  evaluation ledger and the sealed plan, so a new record refreshes it.
+- **Model cache:** loaded models are cached by run, attempt, checkpoint hash and device.
+- **Stale predictions:** a live prediction is tied to its run, attempt, checkpoint hash, device and
+  image. Changing the dataset, method, K or seed therefore cannot show a stale prediction.
+- **Display names:** Flowers display names come from a secondary source and are shown beside the
+  class identity (`pink primrose (label_001)`); the identity is unchanged.
+- **Colors:** chart colors are categorical slots 1–4 of the validated reference palette, in fixed
+  method order, with marker shapes as a second channel. Per-seed points are drawn in one panel
+  per method.
+
+## D-055 (2026-11-02): Recorded paths keep their project spelling through symlinks
+`portable_path` now tries the project-relative spelling before resolving symlinks. Files under
+`runs/artifacts` (a link to local disk, D-039) are recorded as `runs/artifacts/...` instead of
+`<outside project>/<name>`. A path that really leaves the project still keeps only its final
+component. The change came after the sealed evaluation (D-051); it touches no protocol module.

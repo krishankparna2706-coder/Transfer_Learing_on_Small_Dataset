@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import argparse
+
 import pytest
 
 from fewshotlab.cli import main
+from fewshotlab.errors import NotImplementedPhaseError
 from helpers import run_module, snapshot_files
 
 DOCUMENTED_FLAGS = {
@@ -17,12 +20,8 @@ DOCUMENTED_FLAGS = {
     ("benchmark",): ["--config", "--dry-run", "--device", "--allow-download"],
     ("lock-test",): ["--plan", "--dry-run", "--allow-partial", "--skip-reproduction", "--device"],
     ("report",): ["--ledger", "--out", "--study"],
-    ("demo",): ["--port"],
-}
-
-# Commands that are still stubs in this phase, with the phase that implements them.
-STUBS = {
-    "demo": (["demo"], "P6"),
+    ("predict",): ["--run", "--attempt", "--image", "--top-k", "--device", "--json"],
+    ("demo",): ["--port", "--host", "--study", "--check"],
 }
 
 
@@ -40,6 +39,7 @@ def test_root_help_lists_every_command(capsys):
         "benchmark",
         "lock-test",
         "report",
+        "predict",
         "demo",
     ):
         assert command in out
@@ -68,14 +68,28 @@ def test_unknown_dataset_is_a_usage_error():
     assert exc.value.code == 2
 
 
-@pytest.mark.parametrize("name", sorted(STUBS))
-def test_stub_commands_exit_3_and_write_nothing(name, isolated_paths, capsys):
-    argv, phase = STUBS[name]
+def test_an_unfinished_phase_command_exits_3_and_writes_nothing(isolated_paths, monkeypatch):
+    """Every command exists after P6; the stub mechanism stays for later phases."""
+    import fewshotlab.cli as cli
+
+    build = cli.build_parser
+
+    def with_stub():
+        parser = build()
+        sub = next(a for a in parser._actions if isinstance(a, argparse._SubParsersAction))
+        cli._command(
+            sub, "later", "later", "A later feature.", cli._not_implemented("later", "P9", "x")
+        )
+        return parser
+
+    monkeypatch.setattr(cli, "build_parser", with_stub)
     before = snapshot_files(isolated_paths.root)
-    assert main(argv) == 3
-    err = capsys.readouterr().err
-    assert "NOT IMPLEMENTED" in err
-    assert phase in err
+    with pytest.raises(NotImplementedPhaseError) as exc:
+        cli._not_implemented("later", "P9", "x")(argparse.Namespace())
+    assert (
+        exc.value.exit_code == 3 and "NOT IMPLEMENTED" in str(exc.value) and "P9" in str(exc.value)
+    )
+    assert main(["later"]) == 3
     assert snapshot_files(isolated_paths.root) == before
 
 
