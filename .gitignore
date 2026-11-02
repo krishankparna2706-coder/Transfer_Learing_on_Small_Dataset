@@ -39,6 +39,10 @@ runs/*
 # --- Streamlit secrets (none are used; ignored defensively) ----------------
 .streamlit/secrets.toml
 
+# --- Replay rehearsal: the per-image event log (predictions on held-out test images) stays
+#     local like other per-image outputs; its summary and report are tracked -------------
+demo_assets/**/rehearsal_events.csv
+
 # --- User-supplied dataset copies at the repo root: never committed ---------
 /flower_data/
 

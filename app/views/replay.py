@@ -1,17 +1,40 @@
-"""Industrial replay: the sealed NEU stream played back with the sealed model and threshold."""
+"""Industrial replay: the sealed NEU stream, scored live by the sealed model, with a recording
+of the stored sealed predictions as the visible fallback."""
 
 from __future__ import annotations
 
+import csv
+import io
 import time
 
 import streamlit as st
 
 from fewshotlab.errors import FewShotLabError
+from fewshotlab.io_utils import utc_now
 from views import common
 
 PLAY_SECONDS = 1.0
+LIVE = "Live inference (sealed model)"
+STORED = "Stored sealed predictions (recording)"
+EVENT_COLUMNS = (
+    "time_utc",
+    "source",
+    "stream",
+    "position",
+    "derivative_id",
+    "parent_image_id",
+    "run_id",
+    "predicted_class",
+    "model_score",
+    "review",
+    "true_class",
+    "forward_ms",
+    "end_to_end_ms",
+    "device",
+)
 
 reg = common.registry()
+device = common.device()
 st.title("Industrial replay")
 common.badge("replay")
 try:
@@ -45,14 +68,41 @@ with st.container(border=True):
     st.caption(
         f"Image order: {identity['order_rule']} (replay manifest SHA-256 "
         f"`{identity['replay_manifest_sha256'][:16]}...`). "
-        f"Model choice: {identity['selection_rule']}."
+        f"Model choice: {identity['selection_rule']}. Training finished before the demonstration; "
+        "this page only runs inference and reads stored evidence."
     )
 
-top = st.columns([2, 1])
+top = st.columns([2, 2, 1])
 stream_id = top[0].selectbox(
     "Stream", list(streams), format_func=lambda s: streams[s].label, key="replay_stream"
 )
-reveal = top[1].toggle("Reveal true labels (presenter)", key="replay_reveal")
+mode = top[1].radio(
+    "Predictions",
+    [LIVE, STORED],
+    horizontal=True,
+    key="replay_mode",
+    help="Live: the sealed checkpoint scores each shown image now. Recording: the predictions "
+    "stored by the sealed P5 robustness evaluation.",
+)
+reveal = top[2].toggle("Reveal true labels", key="replay_reveal", help="Presenter only.")
+
+recorded = (
+    f"recorded {identity['robustness_utc']} by `{identity['run_id']}` / `{identity['attempt_id']}`"
+)
+live = None
+if mode == LIVE:
+    try:
+        live = common.live_replay(reg, device)
+    except (FewShotLabError, RuntimeError, OSError) as exc:
+        st.warning(
+            f"Live inference is unavailable ({exc}). Showing the stored sealed predictions "
+            f"instead, {recorded}. No other model is substituted.",
+            title="FALLBACK: stored sealed predictions",
+            icon=":material/history:",
+        )
+else:
+    st.info(f"Stored sealed predictions from the P5 robustness evaluation, {recorded}.")
+
 items = view.items(stream_id)
 total = len(items)
 st.session_state.setdefault("replay_index", 0)
@@ -103,6 +153,17 @@ def player() -> None:
                 st.session_state.replay_playing = False
                 st.rerun()
     item = items[index]
+    result = None
+    if live is not None:
+        cache = st.session_state.setdefault("replay_live", {})
+        key = (stream_id, index, device)
+        if key not in cache:
+            cache[key] = live.infer(item)
+        result = cache[key]
+    pred = result.pred_class_id if result else item.pred_class_id
+    score = result.max_score if result else item.max_score
+    flagged = result.review if result else item.review
+
     study_path, fingerprint = str(common.study_path()), reg["fingerprint"]
     st.progress((index + 1) / total, text=f"Image {index + 1} of {total} in this stream")
     left, middle, right = st.columns([1, 1, 1.2])
@@ -129,9 +190,9 @@ def player() -> None:
                 width="stretch",
             )
     with right:
-        st.markdown(f"Predicted defect type\n### {names[item.pred_class_id]}")
-        st.markdown(f"**Model score** {item.max_score:.4f}")
-        if item.review:
+        st.markdown(f"Predicted defect type\n### {names[pred]}")
+        st.markdown(f"**Model score** {score:.4f}")
+        if flagged:
             st.warning(
                 f"Model score below the sealed threshold {view.threshold:g}.",
                 title="HUMAN REVIEW",
@@ -140,11 +201,11 @@ def player() -> None:
         else:
             st.success(
                 f"Model score at or above the sealed threshold {view.threshold:g}.",
-                title=f"ACCEPTED as {names[item.pred_class_id]}",
+                title=f"ACCEPTED as {names[pred]}",
                 icon=":material/check_circle:",
             )
         if reveal:
-            verdict = "correct" if item.correct else "wrong"
+            verdict = "correct" if pred == item.true_class_id else "wrong"
             st.markdown(
                 f"True label: **{names[item.true_class_id]}**; the prediction is **{verdict}**."
             )
@@ -152,6 +213,48 @@ def player() -> None:
             st.caption(
                 "True label hidden. Revealing it never changes the model, score or threshold."
             )
+        if result:
+            st.caption(
+                f"**Measured on {device}, this request:** preprocessing "
+                f"{result.preprocess_ms:.1f} ms, model scoring {result.forward_ms:.1f} ms, end to "
+                f"end {result.end_to_end_ms:.1f} ms (browser rendering excluded). Protocol "
+                "latency (20 warm-up, 200 timed requests) is in the rehearsal report."
+            )
+            if result.matches_stored:
+                st.caption(
+                    "Live result matches the stored sealed prediction (score difference "
+                    f"{result.score_difference:.1e})."
+                )
+            else:
+                st.error(
+                    "The live result differs from the stored sealed prediction: stored "
+                    f"{names[item.pred_class_id]} {item.max_score:.4f}.",
+                    icon=":material/error:",
+                )
+        else:
+            st.caption("Source: the stored sealed prediction (P5 robustness evaluation).")
+
+    events = st.session_state.setdefault("replay_events", {})
+    source = "live" if result else "stored sealed prediction"
+    events.setdefault(
+        (source, stream_id, index, device),
+        {
+            "time_utc": utc_now(),
+            "source": source,
+            "stream": stream_id,
+            "position": item.position,
+            "derivative_id": item.derivative_id,
+            "parent_image_id": item.parent_image_id,
+            "run_id": identity["run_id"],
+            "predicted_class": names[pred],
+            "model_score": f"{score:.6f}",
+            "review": flagged,
+            "true_class": names[item.true_class_id],
+            "forward_ms": f"{result.forward_ms:.3f}" if result else "",
+            "end_to_end_ms": f"{result.end_to_end_ms:.3f}" if result else "",
+            "device": device if result else "",
+        },
+    )
 
     tally = view.tally(stream_id, index + 1)
     shown = tally["shown"]
@@ -173,8 +276,10 @@ def player() -> None:
     stored = view.summaries[stream_id]
     accepted_error = stored["accepted_error_rate"]
     st.caption(
-        f"Stored sealed result for the whole stream (n = {stored['n_images']}): macro-F1 "
-        f"{stored['macro_f1']:.3f}, coverage {stored['coverage']:.1%}, error among accepted "
+        "Counts cover the first images of the stream and use the sealed predictions; each live "
+        "result above is checked against them. Stored sealed result for the whole stream "
+        f"(n = {stored['n_images']}): macro-F1 {stored['macro_f1']:.3f}, coverage "
+        f"{stored['coverage']:.1%}, error among accepted "
         + ("n/a" if accepted_error is None else f"{accepted_error:.1%}")
         + ". Read coverage and the error among accepted predictions together: reviewing nearly "
         "everything makes the accepted error small only by accepting little."
@@ -182,9 +287,47 @@ def player() -> None:
 
 
 player()
+
+events = list(st.session_state.get("replay_events", {}).values())
+if events:
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=EVENT_COLUMNS, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(events)
+    st.download_button(
+        f"Download this session's event log ({len(events)} rows, CSV)",
+        data=buffer.getvalue().encode("utf-8"),
+        file_name=f"replay_events_{identity['study_id']}.csv",
+        mime="text/csv",
+        icon=":material/download:",
+    )
+
+with st.expander("Fixed error gallery: every clean test image the sealed model gets wrong"):
+    clean = view.items("clean")
+    where = {item.parent_image_id: n for n, item in enumerate(clean)}
+    errors = sorted((i for i in clean if not i.correct), key=lambda i: i.parent_image_id)
+    st.caption(
+        f"{len(errors)} of {len(clean)} clean test images. The rule was fixed before looking at "
+        "the errors: every misclassified clean image, sorted by image ID (stored sealed "
+        "predictions). ACCEPTED marks a confident error that the review rule would not catch."
+    )
+    columns = st.columns(5)
+    for n, item in enumerate(errors):
+        decision = "human review" if item.review else "ACCEPTED"
+        columns[n % 5].image(
+            common.replay_pixels(
+                str(common.study_path()), reg["fingerprint"], "clean", where[item.parent_image_id]
+            ),
+            caption=(
+                f"{item.parent_image_id}: true {names[item.true_class_id]}, predicted "
+                f"{names[item.pred_class_id]} {item.max_score:.3f} ({decision})"
+            ),
+            width="stretch",
+        )
+
 st.caption(
-    "Prediction source: the stored sealed prediction from the P5 robustness evaluation, not live "
-    "inference; P7 adds live inference with measured latency. Playback runs at one image per "
-    "second, a presentation pace that says nothing about throughput. NEU-CLS has no defect-free "
-    "class, so this replay cannot show false accepts on normal material."
+    "Playback runs at one image per second, a presentation pace that says nothing about "
+    "throughput; measured latency is shown per image and in the rehearsal report. NEU-CLS has no "
+    "defect-free class, so this replay cannot show false accepts on normal material, and no "
+    "image is ever called safe."
 )

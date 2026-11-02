@@ -11,7 +11,7 @@ Each entry lists commands that were actually executed and what was observed.
 | Implementation | P0–P6 complete. The app (`python -m fewshotlab demo`) and `predict` read only verified records. Test evaluation ended with the sealed run (D-051) |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
 | Benchmark | Core matrix: 156/156 COMPLETED on validation (5 seeds). **Held-out test: 156/156 EVALUATED once** under seal `seal-c6f58862d63b586a0df8dbcf140db0fd` (2026-11-02). Ledger: 6 diagnostic + 8 MVP + 156 core runs |
-| Demo | App implemented (P6): six pages. Its replay plays the sealed NEU stream (stored sealed predictions; demo checkpoint partial, NEU K=10 seed 11, threshold 0.95); live inference on the replay and the judge rehearsal are P7 |
+| Demo | App implemented (P6). P7: the replay scores the sealed NEU stream live with the sealed checkpoint (partial, NEU K=10 seed 11; threshold 0.95), with a labeled stored fallback. Automated offline rehearsal: 2,520 of 2,520 live results equal the sealed ones. Judge script and rehearsal record in [JUDGE_SCRIPT.md](JUDGE_SCRIPT.md) and [REHEARSAL.md](REHEARSAL.md) |
 | Remote push | P0–P5 pushed to `origin/main`; each phase is pushed after its commit |
 
 ## P0: foundation (2026-11-01)
@@ -624,3 +624,59 @@ to the repository, since some show dataset images.
 - Live inference with measured latency on the replay, timed separately from playback.
 - The seven-minute judge script and a rehearsal checklist.
 - A fixed error gallery, using the observed failure above, and an offline package.
+
+## P7: industrial replay and judge rehearsal (2026-11-02)
+
+**State at the end of this entry:**
+- The live replay, the offline rehearsal, the judge script and the rehearsal record are done.
+- The automated rehearsal ran on this Mac.
+- The timed, spoken seven-minute rehearsal is the presenter's to do.
+
+### What changed
+- **Live replay inference** (`simulation/replay_live.py`, D-056):
+  - the sealed checkpoint loads only under its sealed hash;
+  - each derivative is regenerated and checksum-verified, then scored through the sealed
+    evaluation contract;
+  - every result is checked against the stored sealed prediction;
+  - timing follows document 02, p.16 (below).
+- **Offline rehearsal** (`simulation/rehearsal.py`, `demo --rehearse`, D-057):
+  - every network connection is refused;
+  - all 7 streams are scored live and compared with the stored predictions;
+  - the recording goes to `demo_assets/fewshotlab-v1-full/`: `rehearsal.json` and
+    `rehearsal.md` are tracked, while `rehearsal_events.csv` (per image) stays local;
+  - a `replay_rehearsal` ledger event records the file hashes.
+- **Replay page:**
+  - live mode by default, with the measured latency of each request and the stored-prediction
+    check;
+  - a visible fallback to the stored sealed recording, with its timestamp and model ID;
+  - a downloadable event log;
+  - the fixed error gallery (D-058).
+- **Reproducibility page:** "Trace a number" recomputes any plotted macro-F1 from its prediction
+  file and shows the checkpoint hash.
+- **Docs:** [JUDGE_SCRIPT.md](JUDGE_SCRIPT.md) and [REHEARSAL.md](REHEARSAL.md).
+- **Tests:** `tests/test_p7_replay.py` (7 tests).
+
+### Commands executed and observed results
+| Command | Observed |
+|---|---|
+| `python -m fewshotlab demo --rehearse` (CPU, 8 threads, float32, network refused) | **2,520 of 2,520 live predictions equal the stored sealed ones** (360/360 in each stream); stream coverage equals the sealed results.<br>Cold start 120 ms. Forward latency: median 6.12 ms, 95th percentile 6.29 ms (batch 1, 20 warm-up, 200 timed). End to end per image: median 7.02 ms, 95th percentile 11.56 ms (browser excluded). 22.5 s in total |
+| App, reviewed in the built-in browser at 1440×900 | live replay: rolled-in scale at 1.0000, this request 15.4 ms end to end, live = stored (difference 0.0); the trace recomputes 1,020 rows to an identical macro-F1 |
+| `ruff check .`, `ruff format --check .`, `pytest -q` | all checks pass; **286 passed**, 0 skipped, 242 s |
+
+### P7 evidence table
+
+| Criterion | Status | Evidence | Observed |
+|---|---|---|---|
+| Replay model, threshold, order and corruption pixels match the sealed P5 artifacts; changed identities fail | PASS | `sealed_replay` checks (P6); `LiveReplay.load` refuses a changed checkpoint hash (test); every derivative is checksum-verified | 2,520 of 2,520 live = stored |
+| Corruption metrics stay separate with paired parent IDs; no derivative appears in training | PASS | `_separation_problems` test on the fixture and the real study | benchmark predictions are clean-only; every stream keeps the clean parents' order; supports hold only train IDs |
+| Timing separates inference, preprocessing and playback, with the accelerator synchronized | PASS | `replay_live.py`; rehearsal report; replay page | forward and end-to-end figures with samples kept; playback labeled as a presentation pace |
+| An offline rehearsal runs start to finish with no hidden downloads; missing artifacts trigger the documented fallback visibly | PASS | `demo --rehearse` under `no_network`; fallback page test | no connection attempted; "FALLBACK: stored sealed predictions" when the model cannot load |
+| The fallback uses cached real results with timestamps and never invents performance | PASS | stored sealed predictions with their timestamp and model ID | |
+| Checklist, observed timing, failure points, backup launch steps and answers to expected questions saved | PASS | [REHEARSAL.md](REHEARSAL.md) | |
+| Judge script with the protocol's timings, a real failure, and training done in advance | PASS | [JUDGE_SCRIPT.md](JUDGE_SCRIPT.md) | `In_228`: inclusion predicted as scratches at 0.989 and accepted |
+| Pause, resume and deterministic replay work offline; the output is a defect type or review | PASS | replay page (P6 tests and the browser) | |
+| A plotted score reaches its checkpoint and prediction file within a minute | TO VERIFY by the presenter | the trace view on one page | |
+
+### Next action (P8, awaiting go-ahead)
+Release: a reproduction guide, the model card, the evidence index and the release checklist
+(document 02, p.21).

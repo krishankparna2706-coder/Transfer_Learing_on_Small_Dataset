@@ -397,6 +397,36 @@ def _run_demo(args: argparse.Namespace) -> int:
 
     paths = get_paths()
     study = app_launch.study_file(paths, args.study)
+    if args.rehearse:
+        from fewshotlab.devices import resolve_device
+        from fewshotlab.engine.study import load_study
+        from fewshotlab.paths import portable_path
+        from fewshotlab.simulation.rehearsal import output_dir, rehearse
+
+        loaded = load_study(study)
+        summary = rehearse(loaded, paths, device=resolve_device(args.device))
+        fwd, e2e = summary["forward_latency"], summary["per_image"]["end_to_end"]
+        print("REPLAY REHEARSAL, offline (a demonstration record, not a benchmark result)")
+        print(
+            f"  model {summary['model']['run_id']} on {summary['environment']['device']}; "
+            f"seal {summary['seal']['audit_token']}"
+        )
+        print(
+            f"  cold start {summary['cold_start_ms']:.0f} ms; forward latency median "
+            f"{fwd['median_ms']:.2f} ms, 95th percentile {fwd['p95_ms']:.2f} ms (batch 1, "
+            f"{fwd['warmup_requests']} warm-up, {fwd['timed_requests']} timed)"
+        )
+        print(
+            f"  {summary['per_image']['images']} images end to end: median "
+            f"{e2e['median_ms']:.2f} ms, 95th percentile {e2e['p95_ms']:.2f} ms (no browser)"
+        )
+        for s in summary["streams"]:
+            print(
+                f"  {s['stream']:<18} live = stored {s['live_matches_stored']}/{s['images']}, "
+                f"coverage {s['coverage']:.1%}"
+            )
+        print(f"  recording: {portable_path(output_dir(paths, loaded['study_id']))}")
+        return ExitCode.OK if summary["all_live_match_stored"] else ExitCode.FAILURE
     if args.check:
         result = app_launch.startup_check(paths, study)
         for check in result["checks"]:
@@ -708,6 +738,15 @@ def build_parser() -> argparse.ArgumentParser:
         "--check",
         action="store_true",
         help="check offline, on the CPU, that the app can start; serve nothing",
+    )
+    p.add_argument(
+        "--rehearse",
+        action="store_true",
+        help="run the whole sealed replay live and offline, time it, compare every result with "
+        "the stored sealed prediction, and record it under demo_assets/; serve nothing",
+    )
+    p.add_argument(
+        "--device", choices=DEVICE_CHOICES, default="cpu", help="device for --rehearse (cpu)"
     )
     return parser
 

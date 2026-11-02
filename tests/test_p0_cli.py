@@ -21,7 +21,7 @@ DOCUMENTED_FLAGS = {
     ("lock-test",): ["--plan", "--dry-run", "--allow-partial", "--skip-reproduction", "--device"],
     ("report",): ["--ledger", "--out", "--study"],
     ("predict",): ["--run", "--attempt", "--image", "--top-k", "--device", "--json"],
-    ("demo",): ["--port", "--host", "--study", "--check"],
+    ("demo",): ["--port", "--host", "--study", "--check", "--rehearse", "--device"],
 }
 
 

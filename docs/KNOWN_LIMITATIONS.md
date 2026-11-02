@@ -79,8 +79,9 @@ This list states what FewShotLab cannot claim. It is updated as phases add evide
   score for every class. A high score is not evidence that the image belongs to a known class,
   and the review threshold is not reliable out-of-distribution detection.
 - **Scores:** model scores are uncalibrated. No accuracy is shown for uploads.
-- **Replay (P6):** the replay shows the stored sealed predictions. Live inference with measured
-  latency on the replay arrives in P7.
+- **Replay (P7):** the replay scores images live on CPU by default. Its latency figures are from
+  this Mac only (8 threads, float32) and are not a throughput or deployment claim. The timed,
+  spoken rehearsal on the presentation machine is the presenter's to do.
 - **Latency:** the latency on the prediction page is one call, on the chosen device. The first
   call on a device includes one-time warm-up. It is not a benchmarked throughput figure.
 - **Startup:** the app's first page load regenerates every metric from the stored predictions

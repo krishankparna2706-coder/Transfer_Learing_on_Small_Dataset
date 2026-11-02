@@ -517,3 +517,39 @@ Each entry records what was decided, why, and what it implies. Newest entries go
 `runs/artifacts` (a link to local disk, D-039) are recorded as `runs/artifacts/...` instead of
 `<outside project>/<name>`. A path that really leaves the project still keeps only its final
 component. The change came after the sealed evaluation (D-051); it touches no protocol module.
+
+## D-056 (2026-11-02): Live replay inference and its timing protocol
+- **The model:** the replay scores images live with the sealed demo checkpoint
+  (`simulation/replay_live.py`). It loads only under the checkpoint hash in the sealed plan.
+- **The input:** each derivative is regenerated and checksum-verified, then passed through the
+  sealed evaluation contract (`corruptions.to_model_input`) and scored by the stored model's own
+  code. The scoring path is unchanged, since protocol modules are untouched.
+- **The check:** every live result is compared with the stored sealed prediction (same class,
+  score within 1e-4).
+- **Timing** follows document 02, p.16:
+  - **forward latency:** batch 1, a prepared tensor, 20 warm-up and 200 timed requests,
+    synchronized before and after each, with median, 95th percentile and every sample kept;
+  - **end-to-end latency:** per image, from decoding to formatting, browser rendering excluded;
+  - **cold start:** measured separately;
+  - **recorded with each figure:** device, threads, precision and the synchronization method.
+- **Scope of a figure:** one scoring call includes the host-to-device transfer and the return of
+  scores, because the sealed scoring code is used unchanged.
+
+## D-057 (2026-11-02): The offline rehearsal and its recording
+- **The command:** `demo --rehearse` refuses every outgoing socket connection, scores all 7
+  streams live, times them and compares each result with the stored predictions.
+- **The recording:**
+  - it goes to `demo_assets/<study>/`;
+  - `rehearsal.json` and `rehearsal.md` are tracked;
+  - `rehearsal_events.csv`, with per-image predictions on held-out test derivatives, stays local
+    like every other per-image output;
+  - a `replay_rehearsal` event in the run ledger records the files' hashes.
+- **What it is not:** a demonstration record, not a benchmark result. The sealed robustness
+  evaluation stays the reference.
+
+## D-058 (2026-11-02): The fixed error gallery
+- **The rule, set before looking at the errors:** every clean-stream test image that the sealed
+  demo model predicts wrong, sorted by image ID (stored sealed predictions).
+- **The result:** 9 of 360, of which 3 were accepted with high model scores.
+- **Why this rule:** it shows all clean errors rather than a flattering sample.
+- **The judge script** shows the first accepted error, `In_228`.

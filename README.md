@@ -88,7 +88,7 @@ All commands run as `python -m fewshotlab <command>`.
 | `lock-test --plan PATH [--dry-run] [--skip-reproduction] [--allow-partial] [--device ...]` | P5 | implemented (`--dry-run` previews the seal and seals nothing) |
 | `report [--ledger PATH] [--out DIR] [--study PATH]` | P4 / P5 | implemented (validation comparison and seed aggregates; test tables only after a sealed evaluation) |
 | `predict --run RUN_ID --image PATH [--image PATH ...] [--attempt ID] [--top-k N] [--device ...] [--json]` | P6 | implemented (live prediction with one verified stored run: model scores, never a benchmark result; the app uses the same code) |
-| `demo [--port N] [--host ADDR] [--study PATH] [--check]` | P6 | implemented (offline Streamlit app on 127.0.0.1; `--check` verifies offline that it can start) |
+| `demo [--port N] [--host ADDR] [--study PATH] [--check] [--rehearse] [--device ...]` | P6 / P7 | implemented (offline Streamlit app on 127.0.0.1; `--check` verifies offline that it can start; `--rehearse` runs the whole sealed replay live and offline, times it and records it under `demo_assets/`) |
 
 Exit codes:
 - 0: success

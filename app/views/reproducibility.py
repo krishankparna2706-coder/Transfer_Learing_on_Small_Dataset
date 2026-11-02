@@ -12,7 +12,10 @@ import torch
 import torchvision
 
 from fewshotlab import PROTOCOL_ID, __version__
+from fewshotlab.engine import artifacts
+from fewshotlab.errors import FewShotLabError
 from fewshotlab.hashing import sha256_file, sha256_json
+from fewshotlab.metrics.core import classification_metrics
 from fewshotlab.paths import portable_path
 from views import common
 
@@ -130,6 +133,70 @@ else:
             f"- Pretrained weights {weights_id}: `{entry.get('filename')}`, "
             f"SHA-256 `{entry.get('sha256')}`"
         )
+
+st.subheader("Trace a number to its prediction file and checkpoint")
+pick = st.columns(5)
+t_dataset = pick[0].selectbox(
+    "Dataset", study["datasets"], format_func=common.dataset_name, key="trace_dataset"
+)
+t_split = pick[1].selectbox(
+    "Split", ["val", "test"], format_func=common.SPLIT_NAMES.get, key="trace_split"
+)
+t_k = pick[2].selectbox("K", sorted(study["shots"]), key="trace_k")
+t_method = pick[3].selectbox(
+    "Method", [m for m in common.METHOD_ORDER if m in study["methods"]], key="trace_method"
+)
+t_seed = pick[4].selectbox("Seed", sorted(study["support_seeds"]), key="trace_seed")
+cell = next(
+    r
+    for r in reg["rows"][t_split]
+    if (r["dataset"], r["method"], r["k"], r["seed"]) == (t_dataset, t_method, t_k, t_seed)
+)
+if cell["macro_f1"] is None:
+    st.info(f"NOT RUN: this cell is {cell['status']}, so there is no number to trace.")
+else:
+    try:
+        ref = common.cell_ref(reg, t_dataset, t_method, t_k, t_seed)
+        folder = artifacts.run_root(paths, ref.run_id) / ref.attempt_id
+        source = folder / f"predictions_{t_split}.csv"
+        rows = artifacts.read_predictions(source)
+        facts = reg["datasets"][t_dataset]
+        again = classification_metrics(rows["true"], rows["pred"], facts["classes"])["macro_f1"]
+        same = "identical" if again == cell["macro_f1"] else "DIFFERENT"
+        st.markdown(
+            f"- Shown in the app ({common.SPLIT_NAMES[t_split]}): macro-F1 "
+            f"**{cell['macro_f1']:.6f}**\n"
+            f"- Recomputed now from `{portable_path(source)}` ({len(rows['image_ids']):,} rows, "
+            f"SHA-256 `{sha256_file(source)[:16]}...`): **{again:.6f}**, {same}\n"
+            f"- Checkpoint `{ref.artifact_file}`, SHA-256 `{ref.artifact_sha256[:16]}...`; run "
+            f"`{ref.run_id}` / `{ref.attempt_id}`; protocol `{PROTOCOL_ID}`"
+        )
+        st.dataframe(
+            pd.DataFrame(
+                [
+                    {
+                        "image": image_id,
+                        "true class": common.class_label(facts, int(true)),
+                        "predicted": common.class_label(facts, int(pred)),
+                        "model score": float(scores.max()),
+                    }
+                    for image_id, true, pred, scores in list(
+                        zip(
+                            rows["image_ids"],
+                            rows["true"],
+                            rows["pred"],
+                            rows["scores"],
+                            strict=True,
+                        )
+                    )[:8]
+                ]
+            ),
+            hide_index=True,
+            width="stretch",
+        )
+        st.caption("The first 8 prediction rows of that file; every row is one image.")
+    except (FewShotLabError, OSError) as exc:
+        st.error(f"This number cannot be traced: {exc}")
 
 st.subheader("Commands")
 st.code(

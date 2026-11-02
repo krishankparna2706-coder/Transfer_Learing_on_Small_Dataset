@@ -128,8 +128,9 @@ class SealedReplay:
             "accepted_error_rate": accepted_errors / accepted if accepted else None,
         }
 
-    def pixels(self, item: ReplayItem) -> np.ndarray:
-        """The derivative's pixels (H, W, 3, uint8), regenerated and checked against the seal."""
+    def derivative(self, item: ReplayItem) -> torch.Tensor:
+        """The derivative as a (C, H, W) float tensor in [0, 1], regenerated from its parent and
+        checked against its sealed checksum (the model input before the evaluation transform)."""
         record = self._records[item.parent_image_id]
         x = corruptions.decode01(self._data_root / record.relative_path)
         y, made = corruptions.corrupt(x, item.condition, item.severity, item.parent_image_id)
@@ -137,7 +138,11 @@ class SealedReplay:
             raise ReplayUnavailable(
                 f"{item.derivative_id}: the regenerated pixels differ from the sealed checksum"
             )
-        image = (y.clamp(0.0, 1.0) * 255.0).round().to(torch.uint8)
+        return y
+
+    def pixels(self, item: ReplayItem) -> np.ndarray:
+        """The derivative's pixels (H, W, 3, uint8), regenerated and checked against the seal."""
+        image = (self.derivative(item).clamp(0.0, 1.0) * 255.0).round().to(torch.uint8)
         if image.shape[0] == 1:
             image = image.expand(3, -1, -1)
         return image.permute(1, 2, 0).contiguous().numpy()

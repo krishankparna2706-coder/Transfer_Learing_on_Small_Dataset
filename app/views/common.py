@@ -22,6 +22,7 @@ from fewshotlab.engine.study import load_study
 from fewshotlab.errors import FewShotLabError
 from fewshotlab.paths import ProjectPaths, get_paths
 from fewshotlab.reporting import run_registry
+from fewshotlab.simulation.replay_live import LiveReplay
 from fewshotlab.simulation.sealed_replay import SealedReplay, load_sealed_replay
 
 METHOD_ORDER = ("scratch", "frozen", "partial", "prototypes")
@@ -220,6 +221,16 @@ def model(ref: predict.ModelRef, device: str) -> predict.LoadedModel:
 @st.cache_resource(ttl=600, show_spinner="Verifying the sealed replay against the sealed plan...")
 def _replay(path: str, fingerprint: str) -> SealedReplay:
     return load_sealed_replay(_load_study(path), get_paths())
+
+
+@st.cache_resource(ttl=600, show_spinner="Loading the sealed demo model...")
+def _live_replay(path: str, fingerprint: str, device: str) -> LiveReplay:
+    return LiveReplay.load(_replay(path, fingerprint), get_paths(), device)
+
+
+def live_replay(reg: dict[str, Any], device: str) -> LiveReplay:
+    """The sealed demo checkpoint, identified by its sealed hash, cached per device."""
+    return _live_replay(str(study_path()), reg["fingerprint"], device)
 
 
 def replay(reg: dict[str, Any]) -> SealedReplay:
