@@ -101,6 +101,66 @@ Exit codes:
 Nothing is downloaded implicitly. Datasets and pretrained weights are fetched only when a command
 is given `--allow-download`.
 
+## Reproduce the study
+
+Run every command from the repository root as `uv run python -m fewshotlab ...`. Each step lists
+the artifact it produces. The times were measured on an Apple M4 Pro (24 GB).
+
+1. **Install and check:** `uv sync --locked`, then `python -m fewshotlab doctor`.
+   - **Produces:** a device report (MPS or CPU).
+   - `uv run pytest -q` runs the offline fixture tests in about 4 minutes. Real-data tests skip
+     when the data is absent.
+2. **Get the data from the original sources:** follow
+   [DATA_CARD_flowers102.md](docs/DATA_CARD_flowers102.md) and
+   [DATA_CARD_neu_cls.md](docs/DATA_CARD_neu_cls.md). The data is not redistributed here.
+3. **Regenerate the manifests:**
+   - `data prepare --dataset flowers102 --source DIR_WITH_102flowers.tgz_AND_MATS`
+   - `data prepare --dataset neu_cls --source NEU-CLS.rar`
+   - **Produces:** `data/manifests/*-v1.csv` and the class maps. The split manifests are
+     byte-identical to the committed files, and the class-map identity hashes are identical
+     (checked in a clean clone). Flowers display names are added only with `--cross-check PATH`,
+     using the Kaggle copy.
+   - Then `data audit --dataset neu_cls` (or `flowers102`) → `reports/data_audit/<dataset>/`.
+   - Then `support build --config configs/protocol-v1.yaml` → 40 support manifests in
+     `data/manifests/supports/`. Their content hashes equal the committed ones.
+4. **One run:** `train --config configs/runs/diagnostic/flowers102-scratch-k1-s11.yaml`.
+   - **Produces:** `runs/artifacts/<run ID>/a001/` (checkpoint, `predictions_val.csv`,
+     `val_metrics.json`, provenance), in about 20 s.
+   - Prototype runs also need `weights fetch` once (47 MB, network).
+5. **The matrix:** `benchmark --config configs/full-study.yaml`.
+   - Runs 156 unique runs (about 5.8 h of compute here). Finished runs are skipped on a rerun.
+   - Writes a ledger entry for each run.
+6. **Validation report:** `report --study configs/full-study.yaml` →
+   `reports/fewshotlab-v1-full/` (comparison, seed aggregates, plots), regenerated from the
+   stored predictions.
+7. **The test-lock workflow, once:**
+   - `lock-test --plan configs/full-study.yaml --dry-run` writes `seal_preview.json` (about 5
+     min).
+   - `lock-test --plan configs/full-study.yaml` writes `sealed_plan.json`. Commit it before the
+     next step.
+   - `evaluate --split test --study configs/full-study.yaml` scores every sealed run once and
+     runs the robustness study (about 21 min).
+   - Run `report --study ...` again → `reports/fewshotlab-v1-full/test/`.
+8. **Offline demonstration:** `demo --check`, then `demo`. `demo --rehearse` runs a full timed
+   offline rehearsal into `demo_assets/` (about 23 s).
+
+The study in this repository has already completed steps 1 to 8. Its sealed results are in
+`reports/fewshotlab-v1-full/`, and [docs/RELEASE.md](docs/RELEASE.md) gives the status, the
+release gates and the evidence index.
+
+## Limitations (summary)
+
+- **No normal class:** NEU-CLS has no defect-free class, so false accepts on normal parts are
+  not measured. The replay is a simulation on stored images.
+- **Scores:** they are uncalibrated model scores. An image outside the learned classes still
+  receives a score for every class.
+- **Validation numbers:** they are optimistic; only the sealed test numbers are held out.
+- **Seeds:** five seeds describe benchmark variability only; no population confidence intervals
+  are given.
+- **Not in git:** dataset images, checkpoints and weights. Their hashes are in
+  [docs/RELEASE_INVENTORY.md](docs/RELEASE_INVENTORY.md).
+- **Full list:** [docs/KNOWN_LIMITATIONS.md](docs/KNOWN_LIMITATIONS.md).
+
 ## Demonstration app
 
 ```bash

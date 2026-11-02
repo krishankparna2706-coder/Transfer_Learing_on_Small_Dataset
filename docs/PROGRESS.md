@@ -8,7 +8,7 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0–P6 complete. The app (`python -m fewshotlab demo`) and `predict` read only verified records. Test evaluation ended with the sealed run (D-051) |
+| Implementation | P0–P8 complete. The release status, gates and evidence index are in [RELEASE.md](RELEASE.md) |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
 | Benchmark | Core matrix: 156/156 COMPLETED on validation (5 seeds). **Held-out test: 156/156 EVALUATED once** under seal `seal-c6f58862d63b586a0df8dbcf140db0fd` (2026-11-02). Ledger: 6 diagnostic + 8 MVP + 156 core runs |
 | Demo | App implemented (P6). P7: the replay scores the sealed NEU stream live with the sealed checkpoint (partial, NEU K=10 seed 11; threshold 0.95), with a labeled stored fallback. Automated offline rehearsal: 2,520 of 2,520 live results equal the sealed ones. Judge script and rehearsal record in [JUDGE_SCRIPT.md](JUDGE_SCRIPT.md) and [REHEARSAL.md](REHEARSAL.md) |
@@ -680,3 +680,41 @@ to the repository, since some show dataset images.
 ### Next action (P8, awaiting go-ahead)
 Release: a reproduction guide, the model card, the evidence index and the release checklist
 (document 02, p.21).
+
+## P8: reproducible release (2026-11-02)
+
+**State:** the release is prepared. Its four status fields (code, datasets, benchmark, demo),
+release gates, evidence index and handoff are in [RELEASE.md](RELEASE.md).
+
+### What changed
+- **Docs:**
+  - [RELEASE.md](RELEASE.md);
+  - [RELEASE_INVENTORY.md](RELEASE_INVENTORY.md), generated from the files and checked against
+    the sealed plan;
+  - [MODEL_CARD.md](MODEL_CARD.md), one section per method;
+  - [CHANGELOG.md](CHANGELOG.md), keeping measured findings, corrected defects, optional work and
+    open limitations apart;
+  - README sections "Reproduce the study" (each command with its artifact and measured times)
+    and "Limitations (summary)".
+- **Tests:** `tests/test_p8_release.py` checks:
+  - the inventory hashes;
+  - every README command and flag against `--help`;
+  - the numbers quoted in the judge script and model card against the sealed report;
+  - that no dataset image, checkpoint, weights file or archive is in git.
+
+### Commands executed and observed results
+| Command | Observed |
+|---|---|
+| Inventory generator (scratch script) | every check matches:<br>• split manifests and class maps; 40 of 40 supports<br>• both lock files; the replay manifest<br>• the rehearsal files against the ledger<br>• the demo checkpoint and 156 of 156 sealed checkpoints<br>• the ImageNet weights |
+| Fresh clone of the published repository (`127dc96`) in a new environment | doctor PASS.<br>Fixture tests: 277 passed, 8 skipped, 1 failed (an environment-dependent skip rule, fixed).<br>Both split manifests byte-identical; 40 of 40 supports identical; NEU audit written; a real-data diagnostic run COMPLETED; `demo --check` ready.<br>Two README errors found and fixed (see [RELEASE.md](RELEASE.md)) |
+| `ruff check .`, `ruff format --check .`, `pytest -q` | all checks pass; **290 passed**, 0 skipped, 240 s |
+
+### P8 acceptance
+
+| Criterion | Status | Evidence |
+|---|---|---|
+| A new environment follows the README: doctor, fixture tests, a data audit, a real-data example and the offline demo, with no hidden steps | PASS after fixes found by the check | [RELEASE.md](RELEASE.md), "Clean-environment check" |
+| The inventory holds every promised file and the hashes match; no hard-coded scores or untracked dependencies | PASS | [RELEASE_INVENTORY.md](RELEASE_INVENTORY.md); `test_p8_release.py`; the app reads numbers only from the registry |
+| Reports come from the ledger; unfinished work is visible; every completion claim is linked | PASS | the RELEASE.md evidence index and status fields |
+| The judge script fits seven minutes in rehearsal | TO DO (presenter) | [JUDGE_SCRIPT.md](JUDGE_SCRIPT.md), [REHEARSAL.md](REHEARSAL.md) |
+| A final change log distinguishes findings, fixes, optional work and limitations | PASS | [CHANGELOG.md](CHANGELOG.md) |

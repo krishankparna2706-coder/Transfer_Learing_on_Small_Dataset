@@ -128,8 +128,11 @@ def test_corruption_results_stay_apart_and_training_sees_only_train_images(seale
 
 
 @pytest.mark.skipif(
-    not (REPO / "reports" / "fewshotlab-v1-full" / S.SEALED_PLAN).is_file(),
-    reason="the real study's seal and runs are not on this machine",
+    not (
+        (REPO / "reports" / "fewshotlab-v1-full" / S.SEALED_PLAN).is_file()
+        and (REPO / "runs" / "artifacts").is_dir()
+    ),
+    reason="the real study's run folders are not on this machine (a fresh clone has none)",
 )
 def test_real_study_keeps_corruption_results_apart(monkeypatch):
     for name in ("DATA_ROOT", "MANIFESTS_DIR", "RUNS_DIR", "REPORTS_DIR", "CACHE_DIR"):
