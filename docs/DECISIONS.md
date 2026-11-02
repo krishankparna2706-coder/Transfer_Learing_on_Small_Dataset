@@ -428,3 +428,18 @@ Each entry records what was decided, why, and what it implies. Newest entries go
 - If some planned runs are missing, sealing refuses unless `--allow-partial` is given.
 - A partial seal is labelled partial in the plan, the ledger and the CLI output.
 - The missing slots and their statuses are part of the sealed content.
+
+## D-050 (2026-11-02): A run interrupted by system sleep is kept
+- **Event:**
+  - a low-battery system sleep suspended the matrix process for 22,486 s while
+    `fewshotlab-v1__neu_cls__frozen__k5__s55__cfg8b5ac2db` was training;
+  - the process resumed on wake and the run completed.
+- **Decision:** keep the run rather than re-run it.
+  - Training is deterministic, and no training decision reads the wall clock: early stopping and
+    checkpoint selection use validation metrics only.
+  - The run passed the trainer's completion check: reloading its selected checkpoint reproduced
+    its validation predictions.
+  - The seal dry run re-scored its validation set with the merged code and got identical
+    predictions, as it did for all 156 runs.
+- **Recorded:** the run's ledger wall time includes the sleep. [HARDWARE.md](HARDWARE.md) reports
+  the matrix timing without it.

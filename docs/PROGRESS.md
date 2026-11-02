@@ -8,11 +8,11 @@ Each entry lists commands that were actually executed and what was observed.
 
 | Area | Status |
 |---|---|
-| Implementation | P0–P4 complete. lock-test, test evaluation, demo and the app exit 3 or are refused until P5–P6 |
+| Implementation | P0–P5 tooling complete. Test access runs only through the sealed workflow (`lock-test`, then `evaluate --split test --study`). `demo` and the app exit 3 until P6 |
 | Data | Flowers102 PREPARED (official split, MD5-verified) and audited PASS. NEU-CLS PREPARED (project split) and audited PASS. 40 support manifests built |
-| Benchmark | Core matrix NOT_RUN. P4 MVP: 8/8 COMPLETED, **validation only** (n = 1, seed 11; exploratory). Ledger: 6 diagnostic + 8 MVP runs |
-| Demo | NOT_RUN |
-| Remote push | P0 pushed to `origin/main` (`2c1e9b7`) once write access was confirmed |
+| Benchmark | Core matrix: **156/156 COMPLETED on validation** (5 seeds; optimistic). Held-out test: **NOT_RUN** (not sealed; awaiting approval). Ledger: 6 diagnostic + 8 MVP + 156 core runs |
+| Demo | NOT_RUN (P6). Chosen on validation in the seal preview: partial, NEU K=10 seed 11; review threshold 0.95 |
+| Remote push | P0–P5 pushed to `origin/main`; each phase is pushed after its commit |
 
 ## P0: foundation (2026-11-01)
 
@@ -331,3 +331,135 @@ table is in [MVP_DECISION_MEMO.md](MVP_DECISION_MEMO.md) and
 - Repeatability of training on MPS.
 
 **Benchmark (core) metrics: all NOT_RUN.**
+
+## P5: locked benchmark, simulation scorer and test seal (2026-11-01 to 2026-11-02)
+
+**State at the end of this entry:**
+- Implementation is complete.
+- The core matrix is complete on **validation**.
+- The test seal passed its dry run but is **not sealed**.
+- Held-out test metrics are **NOT_RUN**. Sealing and the one-time test evaluation wait for
+  explicit approval.
+
+### What changed
+- **Corruption generator** (`simulation/corruptions.py`, D-042):
+  - brightness ×0.6 / ×1.4, Gaussian blur σ 1 / 2 px, Gaussian noise SD 0.03 / 0.08;
+  - applied to decoded [0, 1] pixels at native resolution, before the evaluation resize;
+  - grayscale is corrupted as one channel; reflect padding; per-derivative seed and checksum.
+  The clean condition reproduces the normal evaluation input exactly.
+- **Review scorer** (`simulation/review.py`, D-044):
+  - the score is the maximum class score, with threshold grid {0, 0.05, …, 1};
+  - it picks the highest threshold that keeps at least 80 % validation coverage;
+  - an image goes to review when its score is strictly below the threshold;
+  - accepted error is null when nothing is accepted.
+- **Demo selection** (`simulation/demo.py`, D-043):
+  - the demo cell is NEU K=10, seed 11, and the method with the highest validation macro-F1 wins;
+  - ties go to the lexically first method;
+  - every candidate must be COMPLETED and verified.
+- **Replay manifest** (`simulation/replay.py`, D-045): a label-independent seeded order of the 360
+  NEU test parents × 7 streams (2,520 rows), sealed by hash.
+- **Test lock** (`engine/seal.py`, D-040/D-041/D-049): `lock-test --plan PATH [--dry-run]`.
+  - It seals code, environment, data, supports, every run's checkpoint and validation evidence,
+    weights, metrics, scorer, calibration (none), corruptions, demo, threshold, replay, test plan
+    and report rules.
+  - Before sealing it re-scores every run's validation set with the current code.
+  - It writes an audit token to the study's evaluation ledger and the run ledger.
+- **Sealed test evaluation** (`engine/test_eval.py`, D-046): `evaluate --split test --study PATH`.
+  - It re-derives the plan first and fails closed on any difference.
+  - Each sealed run is evaluated once, through `GatedTestDataset` only.
+  - The robustness study scores the demo checkpoint on 7 conditions with paired drops versus
+    clean.
+- **Shared inference loader** (`engine/inference.py`): validation re-evaluation and test use one
+  code path.
+- **Seed-aggregated reports** (`reporting/benchmark_report.py`, D-048):
+  - mean and sample SD over distinct runs, and paired method differences on matched seeds;
+  - plots that disclose dataset, K, support and validation budgets, seeds, protocol and n;
+  - test tables only after a sealed evaluation (D-047).
+- **Guardrails:**
+  - every test-split file must be recorded under an intact seal (`audit_test_outputs`);
+  - a static check confirms the training path never imports the test gate or the corruption code.
+
+### Commands executed and observed results
+| Command | Observed |
+|---|---|
+| `benchmark --config configs/full-study.yaml` (MPS, commit `64c7d25`, clean code tree) | **156 COMPLETED, 0 failed** over 160 slots (4 deterministic Flowers K=10 prototype duplicates).<br>Ledger span 12.04 h, of which 6.25 h was a system sleep (see below). About 5.8 h of compute |
+| Seed-11 repeat check: the 8 MVP runs against the matching core runs | **8/8 identical.** Every predicted class and float32 score in `predictions_val.csv` matches, and the selected epochs and validation macro-F1 are equal. Only `run_id` differs |
+| `report --study configs/full-study.yaml` | comparison and seed aggregates regenerated from stored predictions in 89 s.<br>156 runs, 0 sanity failures. Error galleries are written locally and not committed |
+| `lock-test --plan configs/full-study.yaml --dry-run` (MPS, merged `main` `51d664d`, clean code tree) | **ready to seal: True**; nothing was sealed. 286 s.<br>156 sealable runs, 4 duplicates, 0 missing, 0 blocking items.<br>Validation re-scored with the merged code: **156/156 identical**, maximum score difference 0.0.<br>Preview content hash `f556c63c…`, written to `seal_preview.json` |
+| `ruff check .`, `ruff format --check .`, `pytest -q` (merged `main`, real data and weights present) | all checks pass; **264 passed**, 0 skipped, 181 s |
+
+### Interruption during the matrix
+- **What happened:** the Mac was on battery and entered low-power sleep at 1 % charge, at 05:24
+  IST on 2026-11-02 (`pmset -g log`). It woke at 11:39 IST on mains power.
+- **The process:** the matrix was suspended for 22,486 s, then resumed.
+- **The run in progress:** `fewshotlab-v1__neu_cls__frozen__k5__s55__cfg8b5ac2db` completed normally.
+  Reloading its selected checkpoint reproduced its validation predictions, and the seal dry run
+  re-scored it identically (D-050).
+- **Timing:** its ledger wall time (22,593 s) includes the sleep.
+  [HARDWARE.md](HARDWARE.md) reports the matrix timing without it.
+
+### Validation results (5 support seeds)
+
+**VALIDATION ONLY:** each learned checkpoint was selected on these validation images, so the
+numbers are optimistic. They are not held-out test results.
+
+Macro-F1 is shown as mean ± sample SD over distinct runs. The full tables (top-1, balanced
+accuracy, paired differences and the plot) are in `reports/fewshotlab-v1-full/aggregate_val.md`.
+
+| Dataset | K | scratch | frozen | partial | prototypes |
+|---|---:|---:|---:|---:|---:|
+| Flowers102 | 1 | 0.074 ± 0.009 | 0.439 ± 0.033 | 0.433 ± 0.030 | 0.403 ± 0.023 |
+| Flowers102 | 3 | 0.198 ± 0.008 | 0.685 ± 0.011 | 0.695 ± 0.015 | 0.650 ± 0.013 |
+| Flowers102 | 5 | 0.292 ± 0.011 | 0.776 ± 0.010 | 0.799 ± 0.009 | 0.724 ± 0.010 |
+| Flowers102 | 10 | 0.457 ± 0.028 | 0.850 ± 0.002 | 0.887 ± 0.011 | 0.780 (1 distinct run) |
+| NEU-CLS | 1 | 0.451 ± 0.150 | 0.868 ± 0.041 | 0.854 ± 0.057 | 0.816 ± 0.075 |
+| NEU-CLS | 3 | 0.621 ± 0.140 | 0.925 ± 0.016 | 0.940 ± 0.020 | 0.889 ± 0.030 |
+| NEU-CLS | 5 | 0.803 ± 0.038 | 0.950 ± 0.023 | 0.974 ± 0.018 | 0.927 ± 0.023 |
+| NEU-CLS | 10 | 0.776 ± 0.050 | 0.972 ± 0.017 | 0.985 ± 0.007 | 0.949 ± 0.027 |
+
+**Paired differences on matched seeds (validation):**
+- **Transfer vs scratch:** every transfer method beats scratch in 5/5 seeds at every K on both
+  datasets.
+- **Prototypes vs frozen:** prototypes score below frozen in 5/5 seeds at every K on both
+  datasets.
+- **Partial vs frozen:**
+  - partial is higher in 5/5 seeds at Flowers K=5 (+0.022) and K=10 (+0.037), and at NEU K=5
+    (+0.024);
+  - at K=1 it is not higher (Flowers 3/5 seeds, mean −0.006; NEU 1/5 seeds, mean −0.014).
+- **NEU scratch:** it is not higher at K=10 (0.776 ± 0.050) than at K=5 (0.803 ± 0.038). Five
+  seeds do not resolve this.
+
+### P5 evidence table
+
+| Criterion | Status | Evidence | Observed |
+|---|---|---|---|
+| Every planned slot has an explicit status; failures stay visible | PASS | `runs/ledger.jsonl`, `reports/fewshotlab-v1-full/plan.md` | 156 COMPLETED, 4 DEDUPLICATED, 0 FAILED |
+| Checkpoints selected on validation only; test locked throughout training | PASS | `test_guardrails.py` (no unsealed test outputs; the training path never imports the gate or the corruption code); `evaluate --split test` exits 5 without a seal | 0 test-split files |
+| Seed aggregation over distinct runs: sample SD, paired differences on matched seeds, duplicates counted once, no confidence intervals | PASS | `aggregate_val.*`, `paired_val.csv`, `slots_val.csv`, `test_p5_aggregate.py` | Flowers K=10 prototypes shown as 1 distinct run, SD null |
+| Every aggregate regenerates from stored predictions | PASS | `report --study` evidence check | 156/156 |
+| Training repeats exactly on MPS | PASS | seed-11 MVP vs core comparison | 8/8 identical predictions and scores |
+| Validation re-scored with the current code before sealing | PASS (dry run) | `reports/fewshotlab-v1-full/seal_preview.json` | 156/156 identical, maximum score difference 0.0. All runs trained at `64c7d25`; the 14 sealed source files changed since (P5 tooling) give identical results |
+| Complete evaluation plan before any test access: code, environment, data, supports, checkpoints, weights, metrics, scorer, calibration, corruptions, demo, threshold, replay, report rules | READY, not sealed | `seal_preview.json` | ready to seal; 0 blocking items, 0 missing runs; preview content hash `f556c63c…` |
+| Any change to a sealed input fails closed | PASS | `test_p5_seal.py` | a changed checkpoint, support, coverage target, corruption parameter, plan file, ledger or replay file is refused |
+| Corruptions seeded, checksummed and reproducible; the clean condition equals the normal input | PASS | `test_p5_corruptions.py` | 10 tests pass |
+| Review threshold and demo cell chosen on validation only | PASS (dry run) | `seal_preview.json` | demo: partial, NEU K=10 seed 11 (validation macro-F1 0.9917).<br>Threshold 0.95: validation coverage 0.958, 15 of 360 images to review, 1 accepted error (0.29 %) |
+| Held-out test metrics (every sealed run, once) | NOT_RUN | locked until the seal is approved | — |
+| Robustness study on test (demo run, 7 conditions) | NOT_RUN | locked until the seal is approved | — |
+
+### Known issue (cosmetic)
+- `portable_path` resolves the `runs/artifacts` symlink before making a path relative.
+- So files inside run folders are recorded as `<outside project>/<name>`. For example, the dry
+  run's 156 verification events show `<outside project>/val-001.json` for
+  `runs/artifacts/<run>/a001/verifications/val-001.json`.
+- The run ID and attempt still identify each file, and no local path leaks.
+- **Fix:** after the test evaluation. Sealed code must not change between sealing and evaluation.
+
+### Next action (awaiting approval)
+1. `python -m fewshotlab lock-test --plan configs/full-study.yaml` seals the plan. The seal and
+   replay files are then committed.
+2. `python -m fewshotlab evaluate --split test --study configs/full-study.yaml` evaluates each
+   sealed run once on the test split, then runs the robustness study on the demo run.
+3. `python -m fewshotlab report --study configs/full-study.yaml` adds the test aggregates and the
+   robustness report.
+
+**Held-out test metrics: all NOT_RUN.**

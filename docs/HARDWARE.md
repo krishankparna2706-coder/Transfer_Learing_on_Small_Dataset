@@ -57,6 +57,30 @@ against 3.2 ms for Flowers).
 by `benchmark`. That is inside the estimated 0.14–0.82 h. The learned runs stopped after 37–86
 epochs.
 
+**Check against the full matrix (P5):** `benchmark --config configs/full-study.yaml` ran 156
+unique runs on MPS with 0 failures.
+
+| Measure | Observed |
+|---|---:|
+| Wall clock, first run start to last run end (ledger) | 43,338 s (12.04 h) |
+| System sleep inside that span (`pmset -g log`, see below) | 22,486 s (6.25 h) |
+| Wall clock excluding the sleep | about 20,850 s (5.8 h) |
+| Flowers102: 76 runs | 4.95 h |
+| NEU-CLS: 80 runs | 0.84 h |
+
+- **Epochs run:**
+  - Flowers: scratch 35–100 (mean 68.2), frozen 38–99 (mean 62.4), partial 29–86 (mean 46.8).
+  - NEU: scratch 27–100 (mean 68.3), frozen 28–76 (mean 44.4), partial 19–45 (mean 26.6).
+- **Against the estimate:** 5.8 h of compute is inside the estimated 1.56–9.33 h.
+- **The sleep:**
+  - The Mac was running on battery and entered low-power sleep at 1 % charge. That was 05:24
+    IST on 2026-11-02; it woke at 11:39 IST.
+  - The process resumed. The run in progress (`neu_cls` frozen K=5 seed 55) completed normally.
+  - That run's ledger wall time (22,593 s) includes the sleep. Its epoch timers sum to 113 s, and
+    one validation pass took 29.5 s across the wake.
+  - Long jobs need mains power. The idle-sleep blocker (`caffeinate -i`) cannot prevent battery or
+    lid sleep.
+
 ## Compute estimate method
 
 1. **Time a representative job.** Run one timed diagnostic job per method and dataset on the
