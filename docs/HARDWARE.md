@@ -81,6 +81,12 @@ unique runs on MPS with 0 failures.
   - Long jobs need mains power. The idle-sleep blocker (`caffeinate -i`) cannot prevent battery or
     lid sleep.
 
+**Test evaluation (P5):**
+- **Sealing:** it re-scored validation for 156 runs in 276 s.
+- **Evaluation:** `evaluate --split test --study configs/full-study.yaml` then scored the 156
+  sealed runs and the 7-condition robustness study in 1,235 s (20.6 min) on MPS.
+- **Against the estimate:** about 0.36 h (21.6 min).
+
 ## Compute estimate method
 
 1. **Time a representative job.** Run one timed diagnostic job per method and dataset on the

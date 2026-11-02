@@ -2,7 +2,7 @@
 
 > **VALIDATION ONLY: development results over several support seeds per cell. Each learned model's checkpoint was selected on these same validation images, so its numbers are optimistic. None of them is a held-out test result, and they are not comparable with published Flowers102 test benchmarks. Seed aggregates are in aggregate_val.md.**
 
-Generated 2026-11-02T06:27:04Z from the run ledger and the stored prediction files. Slot statuses: {'COMPLETED': 156, 'DEDUPLICATED (= fewshotlab-v1__flowers102__prototypes__k10__s11__cfg086a51d2)': 4}. Every metric value regenerates from its run's `predictions_val.csv`.
+Generated 2026-11-02T07:19:48Z from the run ledger and the stored prediction files. Slot statuses: {'COMPLETED': 156, 'DEDUPLICATED (= fewshotlab-v1__flowers102__prototypes__k10__s11__cfg086a51d2)': 4}. Every metric value regenerates from its run's `predictions_val.csv`.
 
 | Dataset | K | Method | Status | Macro-F1 | Top-1 | Balanced acc. | Top-5 | Selected epoch | Epochs run | Optimizer steps | Trainable params | Fit / val labels | Wall time (s) |
 |---|---:|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---:|

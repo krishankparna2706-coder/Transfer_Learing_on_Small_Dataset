@@ -253,12 +253,16 @@ The test split is locked. Implemented in P5 (`fewshotlab.engine.seal`, `fewshotl
 - A scientific correction after test access marks the affected results INVALIDATED (history is
   kept) and reruns them under a new version.
 - Post-test tuning is a new, exploratory protocol.
+- Once the sealed evaluation is complete, later code changes (for example the P6 app) stop the
+  seal from verifying. That blocks further test access. The recorded results stay the reference:
+  the sealed plan, the evaluation ledger and the file hashes are kept (D-051).
 
 The gate is a process control, not cryptographic isolation.
 
 ## 12. Industrial replay and corruptions
 
-Implemented in P5 (`fewshotlab.simulation`). Nothing has been run on test yet.
+Implemented in P5 (`fewshotlab.simulation`). The sealed robustness study ran once on 2026-11-02
+(`reports/fewshotlab-v1-full/test/robustness.md`).
 
 - **Demo checkpoint:** among the NEU K=10, seed 11 runs of the four methods, the one with the
   highest validation macro-F1. Exact ties go to the lexically first method name. All four

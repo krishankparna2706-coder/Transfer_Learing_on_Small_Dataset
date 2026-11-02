@@ -5,9 +5,9 @@ visual representation help when each class has only 1, 3, 5 or 10 labeled traini
 how do cost, variability and errors change across adaptation methods?**
 
 > **Status:** see [docs/PROGRESS.md](docs/PROGRESS.md) for the current phase and its evidence.
-> Validation numbers are development results. **Held-out test metrics stay NOT_RUN** until the
-> evaluation plan is sealed (`lock-test`) and the sealed evaluation has run. Commands that belong
-> to later phases exit with code 3 ("not implemented") and write nothing.
+> Validation numbers are development results. **Held-out test metrics** were measured once, on
+> 2026-11-02, under the sealed plan `seal-c6f58862…` (`reports/fewshotlab-v1-full/test/`).
+> Commands that belong to later phases exit with code 3 ("not implemented") and write nothing.
 
 ## Scope
 

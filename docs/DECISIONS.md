@@ -443,3 +443,14 @@ Each entry records what was decided, why, and what it implies. Newest entries go
     predictions, as it did for all 156 runs.
 - **Recorded:** the run's ledger wall time includes the sleep. [HARDWARE.md](HARDWARE.md) reports
   the matrix timing without it.
+
+## D-051 (2026-11-02): Code changes after the sealed evaluation
+- **Status:** the sealed evaluation of `fewshotlab-v1-full` is complete. 156 runs and the
+  robustness study were each recorded once under `seal-c6f58862d63b586a0df8dbcf140db0fd`.
+- **Later code changes:** later phases (the P6 app, the P7 replay) and fixes such as the
+  `portable_path` label may change code.
+  - The seal then no longer verifies. That blocks any further test access, as intended.
+- **The recorded evaluation stays the reference.** The sealed plan, the evaluation ledger and the
+  file hashes are kept. Reports regenerate the tables from the stored, hash-checked predictions.
+- **Corrections:** a correction that changes any test result follows PROTOCOL §11. The affected
+  results are marked INVALIDATED, with history kept, and rerun under a new protocol version.

@@ -2,7 +2,7 @@
 
 > **VALIDATION ONLY: development results. Each learned checkpoint was selected on these same validation images, so the numbers are optimistic. They are not held-out test results.**
 
-Generated 2026-11-02T06:27:09Z from stored predictions (protocol fewshotlab-v1). Slots: {'COMPLETED': 156, 'DEDUPLICATED': 4}. Cells show mean +/- sample SD over distinct runs, with the distinct run count in brackets. SD is null when fewer than two distinct runs exist; a deterministic duplicate counts once.
+Generated 2026-11-02T07:19:52Z from stored predictions (protocol fewshotlab-v1). Slots: {'COMPLETED': 156, 'DEDUPLICATED': 4}. Cells show mean +/- sample SD over distinct runs, with the distinct run count in brackets. SD is null when fewer than two distinct runs exist; a deterministic duplicate counts once.
 
 ## flowers102 (102 classes; 1020 validation labels used for checkpoint selection)
 
